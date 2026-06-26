@@ -62,6 +62,20 @@ export default function ProductPage() {
     }
   };
 
+  const fetchProduct = async () => {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", productId)
+      .single();
+
+    if (error) {
+      console.error("Eroare produs:", error.message);
+    } else {
+      setProduct(data);
+    }
+  };
+
   const checkFavorite = async () => {
     const {
       data: { user },
@@ -84,28 +98,81 @@ export default function ProductPage() {
   };
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
+    const loadPageData = async () => {
+      if (!productId) return;
 
-      if (error) {
-        console.error("Eroare produs:", error.message);
-      } else {
-        setProduct(data);
-        await fetchBids();
-        await checkFavorite();
-      }
+      await fetchProduct();
+      await fetchBids();
+      await checkFavorite();
 
       setLoading(false);
     };
 
-    if (productId) {
-      fetchProduct();
-    }
+    loadPageData();
   }, [productId]);
+
+  useEffect(() => {
+    if (!productId) return;
+
+    const channel = supabase
+      .channel(`bids-${productId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "bids",
+          filter: `product_id=eq.${productId}`,
+        },
+        async () => {
+          await fetchBids();
+          await fetchProduct();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [productId]);
+
+  useEffect(() => {
+    const endAuction = async () => {
+      if (!product) return;
+
+      const hasEnded =
+        product.auction_end !== null &&
+        new Date(product.auction_end).getTime() <= Date.now();
+
+      if (!hasEnded) return;
+      if (product.status === "ended") return;
+
+      const highestBid = bids.length > 0 ? bids[0] : null;
+      const winnerId = highestBid ? highestBid.user_id : null;
+
+      const { error: winnerError } = await setProductWinner(
+        product.id,
+        winnerId
+      );
+
+      if (winnerError) {
+        console.error("Eroare setare câștigător:", winnerError.message);
+        return;
+      }
+
+      const { error: statusError } = await markProductAsEnded(product.id);
+
+      if (!statusError) {
+        setProduct({
+          ...product,
+          status: "ended",
+          winner_id: winnerId,
+        });
+      }
+    };
+
+    endAuction();
+  }, [product, bids]);
 
   const handleToggleFavorite = async () => {
     setFavoriteLoading(true);
@@ -158,41 +225,17 @@ export default function ProductPage() {
 
     const amount = Number(bidAmount);
     const currentPrice = product.current_price ?? product.starting_price;
-   const auctionEnded =  product.auction_end !== null &&  new Date(product.auction_end).getTime() <= Date.now();
 
-    useEffect(() => {
-  const endAuction = async () => {
-    if (!product) return;
-    if (!auctionEnded) return;
-    if (product.status === "ended") return;
+    const auctionEnded =
+      product.auction_end !== null &&
+      new Date(product.auction_end).getTime() <= Date.now();
 
-    const highestBid = bids.length > 0 ? bids[0] : null;
-    const winnerId = highestBid ? highestBid.user_id : null;
-
-    const { error: winnerError } = await setProductWinner(
-      product.id,
-      winnerId
-    );
-
-    if (winnerError) {
-      console.error("Eroare setare câștigător:", winnerError.message);
+    if (auctionEnded || product.status === "ended") {
+      setBidError("Licitația este încheiată. Nu se mai pot trimite oferte.");
+      setBidLoading(false);
       return;
     }
 
-    const { error: statusError } = await markProductAsEnded(product.id);
-
-    if (!statusError) {
-      setProduct({
-        ...product,
-        status: "ended",
-        winner_id: winnerId,
-      });
-    }
-  };
-
-  endAuction();
-}, [auctionEnded, product, bids]);
-  
     if (amount <= currentPrice) {
       setBidError(`Oferta trebuie să fie mai mare decât ${currentPrice} €.`);
       setBidLoading(false);
@@ -222,12 +265,12 @@ export default function ProductPage() {
     }
 
     const { error: productUpdateError } = await supabase
-  .from("products")
-  .update({
-    current_price: amount,
-    bid_count: (product.bid_count ?? 0) + 1,
-  })
-  .eq("id", product.id);
+      .from("products")
+      .update({
+        current_price: amount,
+        bid_count: (product.bid_count ?? 0) + 1,
+      })
+      .eq("id", product.id);
 
     if (productUpdateError) {
       setBidError(productUpdateError.message);
@@ -235,11 +278,11 @@ export default function ProductPage() {
       return;
     }
 
-   setProduct({
-  ...product,
-  current_price: amount,
-  bid_count: (product.bid_count ?? 0) + 1,
-});
+    setProduct({
+      ...product,
+      current_price: amount,
+      bid_count: (product.bid_count ?? 0) + 1,
+    });
 
     setBidAmount("");
     await fetchBids();
@@ -275,11 +318,11 @@ export default function ProductPage() {
 
   const currentPrice = product.current_price ?? product.starting_price;
 
-const auctionEnded =
-  product.auction_end !== null &&
-  new Date(product.auction_end).getTime() <= Date.now();
+  const auctionEnded =
+    product.auction_end !== null &&
+    new Date(product.auction_end).getTime() <= Date.now();
 
-return (
+  return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="mx-auto max-w-6xl">
         <Link
@@ -335,6 +378,7 @@ return (
 
             <div className="mb-6 rounded-2xl bg-gray-50 p-5">
               <p className="text-sm text-gray-500">Preț curent</p>
+
               <p className="text-4xl font-bold text-gray-900">
                 {currentPrice} €
               </p>
@@ -351,40 +395,40 @@ return (
               </p>
             </div>
 
-          {auctionEnded ? (
-  <div className="rounded-2xl bg-red-50 p-5 text-red-600">
-    <p className="font-semibold">Licitație încheiată</p>
-    <p className="mt-1 text-sm">
-      Nu se mai pot trimite oferte pentru acest produs.
-    </p>
-  </div>
-) : (
-  <form onSubmit={handleBid} className="space-y-3">
-    <input
-      type="number"
-      min={currentPrice + 1}
-      required
-      value={bidAmount}
-      onChange={(e) => setBidAmount(e.target.value)}
-      className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-      placeholder={`Minim ${currentPrice + 1} €`}
-    />
+            {auctionEnded || product.status === "ended" ? (
+              <div className="rounded-2xl bg-red-50 p-5 text-red-600">
+                <p className="font-semibold">Licitație încheiată</p>
+                <p className="mt-1 text-sm">
+                  Nu se mai pot trimite oferte pentru acest produs.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleBid} className="space-y-3">
+                <input
+                  type="number"
+                  min={currentPrice + 1}
+                  required
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+                  placeholder={`Minim ${currentPrice + 1} €`}
+                />
 
-    {bidError && (
-      <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-        {bidError}
-      </p>
-    )}
+                {bidError && (
+                  <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {bidError}
+                  </p>
+                )}
 
-    <button
-      type="submit"
-      disabled={bidLoading}
-      className="w-full rounded-xl bg-black px-5 py-4 font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-    >
-      {bidLoading ? "Se trimite oferta..." : "Licitează"}
-    </button>
-  </form>
-)}
+                <button
+                  type="submit"
+                  disabled={bidLoading}
+                  className="w-full rounded-xl bg-black px-5 py-4 font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+                >
+                  {bidLoading ? "Se trimite oferta..." : "Licitează"}
+                </button>
+              </form>
+            )}
           </section>
         </div>
 
