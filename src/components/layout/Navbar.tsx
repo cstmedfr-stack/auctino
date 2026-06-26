@@ -60,27 +60,34 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <Container>
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex min-h-20 flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="text-3xl font-bold text-slate-900">
             Vendora
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-            <Link href="/licitatii" className="hover:text-slate-900">
+          <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">
+            <Link href="/dashboard" className="hover:text-slate-900">
               Licitații
             </Link>
 
-            <Link href="/adauga-produs" className="hover:text-slate-900">
-              Vinde
+            <Link href="/my-products" className="hover:text-slate-900">
+              Produsele mele
             </Link>
 
-            <Link href="/cont" className="hover:text-slate-900">
-              Contul meu
+            <Link href="/favorites" className="hover:text-slate-900">
+              Favorite
+            </Link>
+
+            <Link
+              href="/add-product"
+              className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+            >
+              Adaugă produs
             </Link>
           </nav>
 
           {!user ? (
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link href="/login">
                 <Button variant="outline">Login</Button>
               </Link>
@@ -90,8 +97,8 @@ export function Navbar() {
               </Link>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <Link href="/cont">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/my-products">
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
                     {initials}
