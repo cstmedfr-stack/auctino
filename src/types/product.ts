@@ -17,5 +17,10 @@ export interface Product {
 
   status?: string;
 
+  auction_start: string | null;
+  auction_end: string | null;
+  bid_count: number | null;
+  winner_id: string | null;
+
   created_at: string;
 }

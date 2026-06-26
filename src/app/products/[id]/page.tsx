@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  markProductAsEnded,
+  setProductWinner,
+} from "@/services/product.service";
 
 type Product = {
   id: string;
@@ -17,10 +21,15 @@ type Product = {
   location: string | null;
   image_url: string | null;
   created_at: string;
+  bid_count: number | null;
+  auction_end: string | null;
+  status: string | null;
+  winner_id: string | null;
 };
 
 type Bid = {
   id: string;
+  user_id: string;
   amount: number;
   created_at: string;
 };
@@ -42,7 +51,7 @@ export default function ProductPage() {
   const fetchBids = async () => {
     const { data, error } = await supabase
       .from("bids")
-      .select("id, amount, created_at")
+      .select("id, user_id, amount, created_at")
       .eq("product_id", productId)
       .order("amount", { ascending: false });
 
@@ -149,7 +158,41 @@ export default function ProductPage() {
 
     const amount = Number(bidAmount);
     const currentPrice = product.current_price ?? product.starting_price;
+   const auctionEnded =  product.auction_end !== null &&  new Date(product.auction_end).getTime() <= Date.now();
 
+    useEffect(() => {
+  const endAuction = async () => {
+    if (!product) return;
+    if (!auctionEnded) return;
+    if (product.status === "ended") return;
+
+    const highestBid = bids.length > 0 ? bids[0] : null;
+    const winnerId = highestBid ? highestBid.user_id : null;
+
+    const { error: winnerError } = await setProductWinner(
+      product.id,
+      winnerId
+    );
+
+    if (winnerError) {
+      console.error("Eroare setare câștigător:", winnerError.message);
+      return;
+    }
+
+    const { error: statusError } = await markProductAsEnded(product.id);
+
+    if (!statusError) {
+      setProduct({
+        ...product,
+        status: "ended",
+        winner_id: winnerId,
+      });
+    }
+  };
+
+  endAuction();
+}, [auctionEnded, product, bids]);
+  
     if (amount <= currentPrice) {
       setBidError(`Oferta trebuie să fie mai mare decât ${currentPrice} €.`);
       setBidLoading(false);
@@ -179,11 +222,12 @@ export default function ProductPage() {
     }
 
     const { error: productUpdateError } = await supabase
-      .from("products")
-      .update({
-        current_price: amount,
-      })
-      .eq("id", product.id);
+  .from("products")
+  .update({
+    current_price: amount,
+    bid_count: (product.bid_count ?? 0) + 1,
+  })
+  .eq("id", product.id);
 
     if (productUpdateError) {
       setBidError(productUpdateError.message);
@@ -191,10 +235,11 @@ export default function ProductPage() {
       return;
     }
 
-    setProduct({
-      ...product,
-      current_price: amount,
-    });
+   setProduct({
+  ...product,
+  current_price: amount,
+  bid_count: (product.bid_count ?? 0) + 1,
+});
 
     setBidAmount("");
     await fetchBids();
@@ -230,7 +275,11 @@ export default function ProductPage() {
 
   const currentPrice = product.current_price ?? product.starting_price;
 
-  return (
+const auctionEnded =
+  product.auction_end !== null &&
+  new Date(product.auction_end).getTime() <= Date.now();
+
+return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="mx-auto max-w-6xl">
         <Link
@@ -302,31 +351,40 @@ export default function ProductPage() {
               </p>
             </div>
 
-            <form onSubmit={handleBid} className="space-y-3">
-              <input
-                type="number"
-                min={currentPrice + 1}
-                required
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-                placeholder={`Minim ${currentPrice + 1} €`}
-              />
+          {auctionEnded ? (
+  <div className="rounded-2xl bg-red-50 p-5 text-red-600">
+    <p className="font-semibold">Licitație încheiată</p>
+    <p className="mt-1 text-sm">
+      Nu se mai pot trimite oferte pentru acest produs.
+    </p>
+  </div>
+) : (
+  <form onSubmit={handleBid} className="space-y-3">
+    <input
+      type="number"
+      min={currentPrice + 1}
+      required
+      value={bidAmount}
+      onChange={(e) => setBidAmount(e.target.value)}
+      className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+      placeholder={`Minim ${currentPrice + 1} €`}
+    />
 
-              {bidError && (
-                <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                  {bidError}
-                </p>
-              )}
+    {bidError && (
+      <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        {bidError}
+      </p>
+    )}
 
-              <button
-                type="submit"
-                disabled={bidLoading}
-                className="w-full rounded-xl bg-black px-5 py-4 font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-              >
-                {bidLoading ? "Se trimite oferta..." : "Licitează"}
-              </button>
-            </form>
+    <button
+      type="submit"
+      disabled={bidLoading}
+      className="w-full rounded-xl bg-black px-5 py-4 font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+    >
+      {bidLoading ? "Se trimite oferta..." : "Licitează"}
+    </button>
+  </form>
+)}
           </section>
         </div>
 

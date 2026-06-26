@@ -49,3 +49,22 @@ export async function deleteProduct(id: string) {
     .delete()
     .eq("id", id);
 }
+export async function markProductAsEnded(id: string) {
+  return await supabase
+    .from("products")
+    .update({
+      status: "ended",
+    })
+    .eq("id", id);
+}
+export async function setProductWinner(
+  productId: string,
+  winnerId: string | null
+) {
+  return await supabase
+    .from("products")
+    .update({
+      winner_id: winnerId,
+    })
+    .eq("id", productId);
+}

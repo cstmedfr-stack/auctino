@@ -10,109 +10,116 @@ type ProductFormProps = {
   product?: Product;
 };
 
-export default function ProductForm({ mode, product }: ProductFormProps)  {
- 
+export default function ProductForm({ mode, product }: ProductFormProps) {
+  const router = useRouter();
+
   const [title, setTitle] = useState(product?.title || "");
-const [description, setDescription] = useState(product?.description || "");
-const [category, setCategory] = useState(product?.category || "");
-const [condition, setCondition] = useState(product?.condition || "");
-const [startingPrice, setStartingPrice] = useState(
-  product?.starting_price ? String(product.starting_price) : ""
-);
-const [location, setLocation] = useState(product?.location || "");
+  const [description, setDescription] = useState(product?.description || "");
+  const [category, setCategory] = useState(product?.category || "");
+  const [condition, setCondition] = useState(product?.condition || "");
+  const [startingPrice, setStartingPrice] = useState(
+    product?.starting_price ? String(product.starting_price) : ""
+  );
+  const [location, setLocation] = useState(product?.location || "");
   const [imageFile, setImageFile] = useState<File | null>(null);
-    const router = useRouter();
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState("");
+  const [auctionDuration, setAuctionDuration] = useState("7");
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  if (!user) {
-    setError("Trebuie să fii logat ca să adaugi un produs.");
-    setLoading(false);
-    return;
-  }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  let imageUrl = "";
-
-  if (imageFile) {
-    const fileExt = imageFile.name.split(".").pop();
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = `${user.id}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(filePath, imageFile);
-
-    if (uploadError) {
-      setError(uploadError.message);
+    if (!user) {
+      setError("Trebuie să fii logat ca să adaugi sau să editezi un produs.");
       setLoading(false);
       return;
     }
 
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(filePath);
+    let imageUrl = "";
 
-    imageUrl = data.publicUrl;
-  }
+    if (imageFile) {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
-  if (mode === "create") {
-  const { error } = await supabase.from("products").insert({
-    user_id: user.id,
-    title,
-    description,
-    category,
-    condition,
-    starting_price: Number(startingPrice),
-    current_price: Number(startingPrice),
-    location,
-    image_url: imageUrl,
-    status: "active",
-  });
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, imageFile);
 
-  if (error) {
-    setError(error.message);
-    setLoading(false);
-    return;
-  }
+      if (uploadError) {
+        setError(uploadError.message);
+        setLoading(false);
+        return;
+      }
 
-  setLoading(false);
-  router.push("/dashboard");
-  return;
-}
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
 
-if (mode === "edit" && product) {
-  const { error } = await supabase
-    .from("products")
-    .update({
-      title,
-      description,
-      category,
-      condition,
-      starting_price: Number(startingPrice),
-      location,
-      image_url: imageUrl || product.image_url,
-    })
-    .eq("id", product.id);
+      imageUrl = data.publicUrl;
+    }
 
-  if (error) {
-    setError(error.message);
-    setLoading(false);
-    return;
-  }
+    if (mode === "create") {
+      const auctionEnd = new Date();
+      auctionEnd.setDate(auctionEnd.getDate() + Number(auctionDuration));
 
-  setLoading(false);
-  router.push("/my-products");
-}
-};
+      const { error } = await supabase.from("products").insert({
+        user_id: user.id,
+        title,
+        description,
+        category,
+        condition,
+        starting_price: Number(startingPrice),
+        current_price: Number(startingPrice),
+        location,
+        image_url: imageUrl,
+        status: "active",
+        auction_end: auctionEnd.toISOString(),
+        bid_count: 0,
+        winner_id: null,
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      router.push("/dashboard");
+      return;
+    }
+
+    if (mode === "edit" && product) {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          title,
+          description,
+          category,
+          condition,
+          location,
+          image_url: imageUrl || product.image_url,
+        })
+        .eq("id", product.id);
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      router.push("/my-products");
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -200,10 +207,16 @@ if (mode === "edit" && product) {
             required
             min="1"
             value={startingPrice}
+            disabled={mode === "edit"}
             onChange={(e) => setStartingPrice(e.target.value)}
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black disabled:bg-gray-100 disabled:text-gray-500"
             placeholder="100"
           />
+          {mode === "edit" && (
+            <p className="mt-2 text-xs text-gray-500">
+              Prețul de pornire nu poate fi modificat după publicare.
+            </p>
+          )}
         </div>
 
         <div>
@@ -220,24 +233,46 @@ if (mode === "edit" && product) {
           />
         </div>
       </div>
-{error && (
-  <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-    {error}
-  </p>
-)}
+
+      {mode === "create" && (
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Durata licitației
+          </label>
+
+          <select
+            value={auctionDuration}
+            onChange={(e) => setAuctionDuration(e.target.value)}
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+          >
+            <option value="1">1 zi</option>
+            <option value="3">3 zile</option>
+            <option value="5">5 zile</option>
+            <option value="7">7 zile</option>
+            <option value="10">10 zile</option>
+          </select>
+        </div>
+      )}
+
+      {error && (
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+
       <button
-  type="submit"
-  disabled={loading}
-  className="w-full rounded-xl bg-black px-5 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60"
->
-  {loading
-    ? mode === "create"
-      ? "Se adaugă..."
-      : "Se salvează..."
-    : mode === "create"
-      ? "Adaugă produs"
-      : "Salvează modificările"}
-</button>
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-xl bg-black px-5 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60"
+      >
+        {loading
+          ? mode === "create"
+            ? "Se adaugă..."
+            : "Se salvează..."
+          : mode === "create"
+            ? "Adaugă produs"
+            : "Salvează modificările"}
+      </button>
     </form>
   );
 }

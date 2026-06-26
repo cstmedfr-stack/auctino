@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Product } from "@/types/product";
 import FavoriteButton from "./FavoriteButton";
+import AuctionTimer from "../auction/AuctionTimer";
 
 type ProductCardProps = {
   product: Product;
@@ -54,12 +55,21 @@ export default function ProductCard({
           {product.description || "Fără descriere."}
         </p>
 
-        <div className="mb-4 rounded-2xl bg-gray-50 p-4">
-          <p className="text-xs text-gray-500">Preț curent</p>
-          <p className="text-2xl font-bold text-gray-900">
-            {product.current_price ?? product.starting_price} €
-          </p>
-        </div>
+      <div className="mb-4 rounded-2xl bg-gray-50 p-4">
+  <p className="text-xs text-gray-500">Preț curent</p>
+
+  <p className="text-2xl font-bold text-gray-900">
+    {product.current_price ?? product.starting_price} €
+  </p>
+
+  <div className="mt-3 flex flex-wrap gap-2">
+    <AuctionTimer auctionEnd={product.auction_end} />
+
+    <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+      🔥 {product.bid_count ?? 0} oferte
+    </span>
+  </div>
+</div>
 
         {mode === "marketplace" ? (
           <div className="flex gap-2">
