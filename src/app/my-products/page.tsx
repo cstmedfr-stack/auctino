@@ -3,9 +3,27 @@
 import Link from "next/link";
 import { useUserProducts } from "@/hooks/useUserProducts";
 import ProductGrid from "@/components/product/ProductGrid";
+import { deleteProduct } from "@/services/product.service";
 
 export default function MyProductsPage() {
-  const { products, loading } = useUserProducts();
+  const { products, loading, refresh } = useUserProducts();
+
+  const handleDeleteProduct = async (productId: string) => {
+    const confirmed = window.confirm(
+      "Ești sigură că vrei să ștergi acest produs? Această acțiune nu poate fi anulată."
+    );
+
+    if (!confirmed) return;
+
+    const { error } = await deleteProduct(productId);
+
+    if (error) {
+      alert("A apărut o eroare la ștergerea produsului.");
+      return;
+    }
+
+    await refresh();
+  };
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
@@ -48,7 +66,12 @@ export default function MyProductsPage() {
             </Link>
           </div>
         ) : (
-          <ProductGrid products={products} showFavorite={false} mode="owner" />
+          <ProductGrid
+            products={products}
+            showFavorite={false}
+            mode="owner"
+            onDeleteProduct={handleDeleteProduct}
+          />
         )}
       </div>
     </main>

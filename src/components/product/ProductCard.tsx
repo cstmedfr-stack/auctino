@@ -8,6 +8,7 @@ type ProductCardProps = {
   product: Product;
   isFavorite?: boolean;
   onToggleFavorite?: (productId: string) => void;
+  onDeleteProduct?: (productId: string) => void;
   showFavorite?: boolean;
   mode?: "marketplace" | "owner";
 };
@@ -16,6 +17,7 @@ export default function ProductCard({
   product,
   isFavorite = false,
   onToggleFavorite,
+  onDeleteProduct,
   showFavorite = true,
   mode = "marketplace",
 }: ProductCardProps) {
@@ -76,7 +78,7 @@ export default function ProductCard({
             </Link>
           </div>
         ) : (
-         <div className="flex gap-2">
+          <div className="flex gap-2">
             <Link
               href={`/edit-product/${product.id}`}
               className="flex-1 rounded-xl bg-black px-4 py-3 text-center text-sm font-semibold text-white hover:bg-gray-800"
@@ -84,8 +86,11 @@ export default function ProductCard({
               Editează
             </Link>
 
-           <button className="flex-1 rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50">
-             Șterge
+            <button
+              onClick={() => onDeleteProduct?.(product.id)}
+              className="flex-1 rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              Șterge
             </button>
           </div>
         )}
