@@ -4,10 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { placeBid } from "@/services/bid.service";
+import { createNotification } from "@/services/notification.service";
 import {
   markProductAsEnded,
   setProductWinner,
 } from "@/services/product.service";
+
+function formatPrice(price: number | null | undefined) {
+  if (price === null || price === undefined) return "0 lei";
+  return `${price} lei`;
+}
 
 type Product = {
   id: string;
@@ -90,11 +97,7 @@ export default function ProductPage() {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!error && data) {
-      setIsFavorite(true);
-    } else {
-      setIsFavorite(false);
-    }
+    setIsFavorite(!error && !!data);
   };
 
   useEffect(() => {
@@ -162,13 +165,36 @@ export default function ProductPage() {
 
       const { error: statusError } = await markProductAsEnded(product.id);
 
-      if (!statusError) {
-        setProduct({
-          ...product,
-          status: "ended",
-          winner_id: winnerId,
+      if (statusError) {
+        console.error("Eroare închidere licitație:", statusError.message);
+        return;
+      }
+
+      if (winnerId) {
+        await createNotification({
+          userId: winnerId,
+          productId: product.id,
+          title: "Ai câștigat licitația",
+          message: `Ai câștigat licitația pentru "${product.title}".`,
+          type: "auction_won",
         });
       }
+
+      await createNotification({
+        userId: product.user_id,
+        productId: product.id,
+        title: "Licitația ta s-a încheiat",
+        message: winnerId
+          ? `Licitația pentru "${product.title}" s-a încheiat cu un câștigător.`
+          : `Licitația pentru "${product.title}" s-a încheiat fără oferte.`,
+        type: "auction_ended",
+      });
+
+      setProduct({
+        ...product,
+        status: "ended",
+        winner_id: winnerId,
+      });
     };
 
     endAuction();
@@ -224,23 +250,6 @@ export default function ProductPage() {
     }
 
     const amount = Number(bidAmount);
-    const currentPrice = product.current_price ?? product.starting_price;
-
-    const auctionEnded =
-      product.auction_end !== null &&
-      new Date(product.auction_end).getTime() <= Date.now();
-
-    if (auctionEnded || product.status === "ended") {
-      setBidError("Licitația este încheiată. Nu se mai pot trimite oferte.");
-      setBidLoading(false);
-      return;
-    }
-
-    if (amount <= currentPrice) {
-      setBidError(`Oferta trebuie să fie mai mare decât ${currentPrice} €.`);
-      setBidLoading(false);
-      return;
-    }
 
     const {
       data: { user },
@@ -252,40 +261,29 @@ export default function ProductPage() {
       return;
     }
 
-    const { error: bidInsertError } = await supabase.from("bids").insert({
-      product_id: product.id,
-      user_id: user.id,
-      amount,
-    });
+    try {
+      const updatedProduct = await placeBid({
+        product,
+        bidderId: user.id,
+        amount,
+      });
 
-    if (bidInsertError) {
-      setBidError(bidInsertError.message);
-      setBidLoading(false);
-      return;
+      setProduct({
+        ...product,
+        current_price: updatedProduct.current_price,
+        bid_count: updatedProduct.bid_count,
+      });
+
+      setBidAmount("");
+      await fetchBids();
+    } catch (error) {
+      if (error instanceof Error) {
+        setBidError(error.message);
+      } else {
+        setBidError("A apărut o eroare la trimiterea ofertei.");
+      }
     }
 
-    const { error: productUpdateError } = await supabase
-      .from("products")
-      .update({
-        current_price: amount,
-        bid_count: (product.bid_count ?? 0) + 1,
-      })
-      .eq("id", product.id);
-
-    if (productUpdateError) {
-      setBidError(productUpdateError.message);
-      setBidLoading(false);
-      return;
-    }
-
-    setProduct({
-      ...product,
-      current_price: amount,
-      bid_count: (product.bid_count ?? 0) + 1,
-    });
-
-    setBidAmount("");
-    await fetchBids();
     setBidLoading(false);
   };
 
@@ -380,11 +378,11 @@ export default function ProductPage() {
               <p className="text-sm text-gray-500">Preț curent</p>
 
               <p className="text-4xl font-bold text-gray-900">
-                {currentPrice} €
+                {formatPrice(currentPrice)}
               </p>
 
               <p className="mt-2 text-sm text-gray-500">
-                Preț de pornire: {product.starting_price} €
+                Preț de pornire: {formatPrice(product.starting_price)}
               </p>
             </div>
 
@@ -411,7 +409,7 @@ export default function ProductPage() {
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-                  placeholder={`Minim ${currentPrice + 1} €`}
+                  placeholder={`Minim ${formatPrice(currentPrice + 1)}`}
                 />
 
                 {bidError && (
@@ -447,7 +445,7 @@ export default function ProductPage() {
                   className="flex items-center justify-between rounded-2xl bg-gray-50 p-4"
                 >
                   <span className="font-semibold text-gray-900">
-                    {bid.amount} €
+                    {formatPrice(bid.amount)}
                   </span>
 
                   <span className="text-sm text-gray-500">

@@ -6,6 +6,9 @@ import { supabase } from "@/lib/supabase";
 
 import { Button } from "../ui/Button";
 import { Container } from "./Container";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import NotificationDropdown from "@/components/notifications/NotificationDropdown";
 
 type UserInfo = {
   email: string;
@@ -14,6 +17,15 @@ type UserInfo = {
 
 export function Navbar() {
   const [user, setUser] = useState<UserInfo | null>(null);
+
+  const [showNotifications, setShowNotifications] = useState(false);
+
+const {
+  notifications,
+  unreadCount,
+  markAsRead,
+  markAllAsRead,
+} = useNotifications();
 
   useEffect(() => {
     async function loadUser() {
@@ -69,7 +81,7 @@ export function Navbar() {
             <Link href="/dashboard" className="hover:text-slate-900">
               Licitații
             </Link>
-
+          
             <Link href="/my-products" className="hover:text-slate-900">
               Produsele mele
             </Link>
@@ -97,7 +109,15 @@ export function Navbar() {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex flex-wrap items-center gap-3">
+              <NotificationBell
+             unreadCount={unreadCount}
+               onClick={() => setShowNotifications((prev) => !prev)}/>
+
+            {showNotifications && (<NotificationDropdown notifications={notifications}
+             onRead={markAsRead}
+            onMarkAllRead={markAllAsRead}/>
+              )}
               <Link href="/my-products">
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
