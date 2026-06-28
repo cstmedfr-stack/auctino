@@ -18,6 +18,8 @@ function getNotificationStyle(type: Notification["type"]) {
       return "bg-green-50 text-green-600";
     case "auction_ended":
       return "bg-red-50 text-red-600";
+     case "new_message":
+  return "bg-purple-50 text-purple-600";
     default:
       return "bg-slate-50 text-slate-600";
   }
@@ -33,6 +35,8 @@ function getNotificationIcon(type: Notification["type"]) {
       return "🏆";
     case "auction_ended":
       return "⏳";
+     case "new_message":
+     return "💬";
     default:
       return "🔔";
   }
@@ -75,13 +79,21 @@ export default function NotificationItem({
     </div>
   );
 
-  if (notification.product_id) {
-    return (
-      <Link href={`/products/${notification.product_id}`}>
-        {content}
-      </Link>
-    );
-  }
+  if (notification.conversation_id) {
+  return (
+    <Link href={`/chat?conversation=${notification.conversation_id}`}>
+      {content}
+    </Link>
+  );
+}
 
-  return content;
+if (notification.product_id) {
+  return (
+    <Link href={`/products/${notification.product_id}`}>
+      {content}
+    </Link>
+  );
+}
+
+return content;
 }

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { placeBid } from "@/services/bid.service";
 import { createNotification } from "@/services/notification.service";
-import {
-  markProductAsEnded,
-  setProductWinner,
-} from "@/services/product.service";
+import {  markProductAsEnded,  setProductWinner,} from "@/services/product.service";
+import {  createConversation,  getConversation,} from "@/services/chat.service";
+
+
 
 function formatPrice(price: number | null | undefined) {
   if (price === null || price === undefined) return "0 lei";
@@ -44,7 +44,7 @@ type Bid = {
 export default function ProductPage() {
   const params = useParams();
   const productId = params.id as string;
-
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -54,6 +54,7 @@ export default function ProductPage() {
   const [bidError, setBidError] = useState("");
   const [bidLoading, setBidLoading] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState("");
 
   const fetchBids = async () => {
     const { data, error } = await supabase
@@ -101,18 +102,24 @@ export default function ProductPage() {
   };
 
   useEffect(() => {
-    const loadPageData = async () => {
-      if (!productId) return;
+  const loadPageData = async () => {
+    if (!productId) return;
 
-      await fetchProduct();
-      await fetchBids();
-      await checkFavorite();
+    await fetchProduct();
+    await fetchBids();
+    await checkFavorite();
 
-      setLoading(false);
-    };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    loadPageData();
-  }, [productId]);
+    setCurrentUserId(user?.id ?? "");
+
+    setLoading(false);
+  };
+
+  loadPageData();
+}, [productId]);
 
   useEffect(() => {
     if (!productId) return;
@@ -236,7 +243,48 @@ export default function ProductPage() {
 
     setFavoriteLoading(false);
   };
+const handleContactSeller = async () => {
+  if (!product) return;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    alert("Trebuie să fii logat ca să contactezi vânzătorul.");
+    return;
+  }
+
+  if (user.id === product.user_id) {
+    alert("Nu poți începe chat cu tine însuți.");
+    return;
+  }
+
+  const { data: existingConversation } = await getConversation(
+    product.id,
+    product.user_id,
+    user.id
+  );
+
+  let conversationId = existingConversation?.id;
+
+  if (!conversationId) {
+    const { data: newConversation, error } = await createConversation(
+      product.id,
+      product.user_id,
+      user.id
+    );
+
+    if (error || !newConversation) {
+      alert("Nu am putut crea conversația.");
+      return;
+    }
+
+    conversationId = newConversation.id;
+  }
+
+  router.push(`/chat?conversation=${conversationId}`);
+};
   const handleBid = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -427,7 +475,13 @@ export default function ProductPage() {
                 </button>
               </form>
             )}
+            <button
+          onClick={handleContactSeller}
+           className="mt-4 w-full rounded-xl border border-slate-200 px-5 py-4 font-semibold text-slate-700 hover:bg-slate-50">
+  💬        Contactează vânzătorul
+          </button>
           </section>
+
         </div>
 
         <section className="mt-8 rounded-3xl bg-white p-8 shadow-sm">

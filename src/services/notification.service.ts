@@ -4,17 +4,20 @@ export type NotificationType =
   | "new_bid"
   | "outbid"
   | "auction_won"
-  | "auction_ended";
+  | "auction_ended"
+  | "new_message";
 
 export async function createNotification({
   userId,
   productId,
+  conversationId,
   title,
   message,
   type,
 }: {
   userId: string;
   productId?: string | null;
+  conversationId?: string | null;
   title: string;
   message: string;
   type: NotificationType;
@@ -22,13 +25,13 @@ export async function createNotification({
   return await supabase.from("notifications").insert({
     user_id: userId,
     product_id: productId,
+    conversation_id: conversationId,
     title,
     message,
     type,
     is_read: false,
   });
 }
-
 export async function getUserNotifications(userId: string) {
   return await supabase
     .from("notifications")
