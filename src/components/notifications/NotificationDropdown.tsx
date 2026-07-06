@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import NotificationItem from "./NotificationItem";
 import { Notification } from "@/types/notification";
 
@@ -47,6 +48,15 @@ export default function NotificationDropdown({
             ))}
           </div>
         )}
+      </div>
+
+      <div className="border-t border-slate-100 p-3">
+        <Link
+          href="/notifications"
+          className="block rounded-xl px-4 py-3 text-center text-sm font-bold text-blue-600 hover:bg-slate-50"
+        >
+          Vezi toate notificările
+        </Link>
       </div>
     </div>
   );

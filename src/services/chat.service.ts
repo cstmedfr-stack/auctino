@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { createNotification } from "./notification.service";
 
 export async function getConversation(
   productId: string,
@@ -20,17 +19,25 @@ export async function createConversation(
   sellerId: string,
   buyerId: string
 ) {
-  return await supabase
-    .from("conversations")
-    .insert({
-      product_id: productId,
-      seller_id: sellerId,
-      buyer_id: buyerId,
-    })
-    .select()
-    .single();
+  /*
+   * sellerId este păstrat în parametri pentru
+   * compatibilitate cu paginile existente.
+   * RPC-ul identifică vânzătorul direct din produs.
+   */
+  void sellerId;
+
+  return await supabase.rpc(
+    "get_or_create_product_conversation",
+    {
+      p_product_id: productId,
+      p_buyer_id: buyerId,
+    }
+  );
 }
-export async function getConversationById(conversationId: string) {
+
+export async function getConversationById(
+  conversationId: string
+) {
   return await supabase
     .from("conversations")
     .select("*")
@@ -38,19 +45,20 @@ export async function getConversationById(conversationId: string) {
     .single();
 }
 
-export async function getMessages(conversationId: string) {
+export async function getMessages(
+  conversationId: string
+) {
   return await supabase
     .from("messages")
     .select("*")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true });
+    .order("created_at", {
+      ascending: true,
+    });
 }
 
 export async function sendMessage({
   conversationId,
-  senderId,
-  receiverId,
-  productId,
   content,
 }: {
   conversationId: string;
@@ -59,35 +67,23 @@ export async function sendMessage({
   productId: string;
   content: string;
 }) {
-  const { error } = await supabase.from("messages").insert({
-    conversation_id: conversationId,
-    sender_id: senderId,
-    content,
-  });
+  const { data, error } = await supabase.rpc(
+    "send_message_with_notification",
+    {
+      p_conversation_id: conversationId,
+      p_content: content,
+    }
+  );
 
-  if (error) {
-    return { error };
-  }
-if (error) {
-  return { error };
+  return {
+    data,
+    error,
+  };
 }
 
-
-
-await createNotification({
-  userId: receiverId,
-  productId,
-  conversationId,
-  title: "Ai primit un mesaj nou",
-  message: content,
-  type: "new_message",
-});
-
-return { error: null };
-
-}
-
-export async function getUserConversations(userId: string) {
+export async function getUserConversations(
+  userId: string
+) {
   return await supabase
     .from("conversations")
     .select(`
@@ -105,18 +101,24 @@ export async function getUserConversations(userId: string) {
         created_at
       )
     `)
-    .or(`seller_id.eq.${userId},buyer_id.eq.${userId}`);
+    .or(
+      `seller_id.eq.${userId},buyer_id.eq.${userId}`
+    );
 }
+
 export async function markMessagesAsRead(
   conversationId: string,
   currentUserId: string
 ) {
-  return await supabase
-    .from("messages")
-    .update({
-      is_read: true,
-    })
-    .eq("conversation_id", conversationId)
-    .neq("sender_id", currentUserId)
-    .eq("is_read", false);
+  /*
+   * Identitatea reală este stabilită prin auth.uid().
+   */
+  void currentUserId;
+
+  return await supabase.rpc(
+    "mark_own_conversation_messages_as_read",
+    {
+      p_conversation_id: conversationId,
+    }
+  );
 }

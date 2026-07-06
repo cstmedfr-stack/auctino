@@ -1,7 +1,7 @@
 export interface Profile {
   id: string;
 
-  email: string;
+ email?: string;
 
   full_name: string;
 
@@ -13,7 +13,7 @@ export interface Profile {
 
   identity_verified: boolean;
 
-  trust_score: number;
+ trust_score?: number;
 
   rating: number;
 

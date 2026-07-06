@@ -1,0 +1,93 @@
+export const PRODUCT_CATEGORIES = [
+  {
+    id: "electronics",
+    label: "Electronice",
+    subcategories: [
+      "Telefoane",
+      "Laptopuri",
+      "Tablete",
+      "Gaming",
+      "TV & Audio",
+      "Foto & Video",
+      "Accesorii",
+    ],
+  },
+  {
+    id: "fashion",
+    label: "Fashion",
+    subcategories: [
+      "Femei",
+      "Bărbați",
+      "Copii",
+      "Încălțăminte",
+      "Genți",
+      "Bijuterii",
+      "Ceasuri",
+    ],
+  },
+  {
+    id: "home",
+    label: "Casă și grădină",
+    subcategories: [
+      "Mobilă",
+      "Electrocasnice",
+      "Decorațiuni",
+      "Unelte",
+      "Grădină",
+      "Bucătărie",
+    ],
+  },
+  {
+    id: "auto",
+    label: "Auto & Moto",
+    subcategories: [
+  "Autoturisme",
+  "Motociclete",
+  "Scutere",
+  "Autoutilitare",
+  "Rulote",
+  "Remorci",
+  "Piese auto",
+  "Accesorii auto",
+  "Anvelope & jante",
+  "Scule auto",
+  "Altele",
+],
+  },
+  {
+    id: "sports",
+    label: "Sport & Hobby",
+    subcategories: [
+      "Fitness",
+      "Biciclete",
+      "Camping",
+      "Instrumente muzicale",
+      "Cărți",
+      "Colecții",
+    ],
+  },
+  {
+    id: "kids",
+    label: "Copii & Bebeluși",
+    subcategories: [
+      "Jucării",
+      "Cărucioare",
+      "Scaune auto",
+      "Haine copii",
+      "Mobilier copii",
+    ],
+  },
+  {
+    id: "other",
+    label: "Altele",
+    subcategories: ["Altele"],
+  },
+] as const;
+
+export const PRODUCT_CONDITIONS = [
+  "Nou",
+  "Ca nou",
+  "Foarte bună",
+  "Bună",
+  "Acceptabilă",
+] as const;

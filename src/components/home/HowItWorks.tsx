@@ -6,17 +6,17 @@ const steps = [
   {
     icon: PackagePlus,
     title: "Publici produsul",
-    description: "Adaugi poze, descriere, preț de pornire și durata licitației.",
+    description: "În câteva minute adaugi fotografii, descrierea și stabilești prețul de pornire al licitației.",
   },
   {
     icon: Gavel,
     title: "Primești oferte",
-    description: "Cumpărătorii licitează, iar prețul crește transparent.",
+    description: "Primești oferte în timp real și urmărești evoluția licitației direct din contul tău.",
   },
   {
     icon: Trophy,
     title: "Vinzi celui mai bun ofertant",
-    description: "La finalul licitației, câștigă cea mai mare ofertă.",
+    description: "La încheierea licitației, produsul este adjudecat automat celui mai bun ofertant.",
   },
 ];
 
@@ -34,7 +34,7 @@ export function HowItWorks() {
           </h2>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
-            Vendora elimină negocierile inutile și lasă piața să decidă prețul corect.
+            Publică gratuit, urmărește licitația în timp real și vinde rapid celui care oferă cel mai bun preț.
           </p>
         </div>
 

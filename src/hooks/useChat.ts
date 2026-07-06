@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Conversation, Message } from "@/types/chat";
 import {
@@ -25,6 +25,9 @@ export function useChat({
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadChat = async () => {
     setLoading(true);
@@ -79,7 +82,7 @@ export function useChat({
     if (!conversationId) return;
 
     const channel = supabase
-      .channel(`messages-${conversationId}`)
+      .channel(`chat-${conversationId}`)
       .on(
         "postgres_changes",
         {
@@ -106,12 +109,43 @@ export function useChat({
           }
         }
       )
+      .on("broadcast", { event: "typing" }, (payload) => {
+        const typingUserId = payload.payload?.userId;
+
+        if (!typingUserId || typingUserId === currentUserId) return;
+
+        setIsTyping(true);
+
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 2000);
+      })
       .subscribe();
 
     return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
       supabase.removeChannel(channel);
     };
   }, [conversationId, currentUserId]);
+
+  const sendTypingEvent = async () => {
+    if (!conversationId || !currentUserId) return;
+
+    await supabase.channel(`chat-${conversationId}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        userId: currentUserId,
+      },
+    });
+  };
 
   const sendChatMessage = async (senderId: string, content: string) => {
     if (!conversationId) {
@@ -135,6 +169,8 @@ export function useChat({
       return;
     }
 
+    setIsTyping(false);
+
     const { data: messagesData } = await getMessages(conversationId);
     setMessages(messagesData || []);
   };
@@ -143,6 +179,8 @@ export function useChat({
     conversation,
     messages,
     loading,
+    isTyping,
+    sendTypingEvent,
     sendChatMessage,
   };
 }

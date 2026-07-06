@@ -3,7 +3,7 @@ type ProfileHeaderProps = {
   avatarUrl?: string | null;
 };
 
-export function ProfileHeader({
+export default function ProfileHeader({
   fullName,
   avatarUrl,
 }: ProfileHeaderProps) {

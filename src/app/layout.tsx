@@ -1,6 +1,8 @@
 import "./globals.css";
+
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "../components/layout/Footer";
+import { Footer } from "@/components/layout/Footer";
+import AccountStatusGuard from "@/components/auth/AccountStatusGuard";
 
 export const metadata = {
   title: "Vendora",
@@ -15,9 +17,13 @@ export default function RootLayout({
   return (
     <html lang="ro">
       <body>
-        <Navbar />
-        {children}
+        <AccountStatusGuard>
+          <Navbar />
+
+          {children}
+
           <Footer />
+        </AccountStatusGuard>
       </body>
     </html>
   );

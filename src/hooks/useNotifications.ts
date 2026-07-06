@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { supabase } from "@/lib/supabase";
 
 import {
@@ -12,88 +18,314 @@ import {
 import { Notification } from "@/types/notification";
 
 export function useNotifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] =
+    useState<Notification[]>([]);
+
   const [loading, setLoading] = useState(true);
 
-  const loadNotifications = async () => {
+  const channelInstanceId = useRef(
+    Math.random().toString(36).slice(2)
+  );
+
+  const loadNotifications = useCallback(async () => {
+    setLoading(true);
+
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (userError || !user) {
       setNotifications([]);
       setLoading(false);
       return;
     }
 
-    const { data, error } = await getUserNotifications(user.id);
+    const { data, error } =
+      await getUserNotifications(user.id);
 
-    if (!error && data) {
-      setNotifications(data as Notification[]);
+    if (error) {
+      console.error(
+        "Eroare la încărcarea notificărilor:",
+        error
+      );
+
+      setLoading(false);
+      return;
     }
 
+    setNotifications(
+      (data ?? []) as Notification[]
+    );
+
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isActive = true;
 
-    const setupRealtime = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    let channel:
+      | ReturnType<typeof supabase.channel>
+      | null = null;
 
-      if (!user) {
-        setLoading(false);
+    let retryTimeout: number | null = null;
+    let pollingInterval: number | null = null;
+    let retryCount = 0;
+
+    async function refreshNotifications(
+      userId: string
+    ) {
+      const { data, error } =
+        await getUserNotifications(userId);
+
+      if (!isActive) {
         return;
       }
 
-      await loadNotifications();
+      if (error) {
+        console.error(
+          "Eroare la actualizarea notificărilor:",
+          error
+        );
 
-      channel = supabase
-        .channel(`notifications-${user.id}`)
+        return;
+      }
+
+      setNotifications(
+        (data ?? []) as Notification[]
+      );
+
+      setLoading(false);
+    }
+
+    async function removeCurrentChannel() {
+      if (!channel) {
+        return;
+      }
+
+      const oldChannel = channel;
+      channel = null;
+
+      await supabase.removeChannel(oldChannel);
+    }
+
+    async function subscribeToNotifications(
+      userId: string
+    ) {
+      if (!isActive) {
+        return;
+      }
+
+      await removeCurrentChannel();
+
+      if (!isActive) {
+        return;
+      }
+
+      const channelName = [
+        "notifications",
+        userId,
+        channelInstanceId.current,
+        Date.now(),
+      ].join("-");
+
+      const newChannel = supabase
+        .channel(channelName)
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${userId}`,
           },
           (payload) => {
-            const newNotification = payload.new as Notification;
+            if (!isActive) {
+              return;
+            }
 
-            setNotifications((prev) => [
-              newNotification,
-              ...prev,
-            ]);
+            const newNotification =
+              payload.new as Notification;
+
+            setNotifications(
+              (previousNotifications) => {
+                const alreadyExists =
+                  previousNotifications.some(
+                    (notification) =>
+                      notification.id ===
+                      newNotification.id
+                  );
+
+                if (alreadyExists) {
+                  return previousNotifications;
+                }
+
+                return [
+                  newNotification,
+                  ...previousNotifications,
+                ];
+              }
+            );
           }
         )
-        .subscribe();
-    };
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            if (!isActive) {
+              return;
+            }
 
-    setupRealtime();
+            const updatedNotification =
+              payload.new as Notification;
+
+            setNotifications(
+              (previousNotifications) =>
+                previousNotifications.map(
+                  (notification) =>
+                    notification.id ===
+                    updatedNotification.id
+                      ? updatedNotification
+                      : notification
+                )
+            );
+          }
+        );
+
+      channel = newChannel;
+
+      newChannel.subscribe((status) => {
+        if (!isActive) {
+          return;
+        }
+
+        if (status === "SUBSCRIBED") {
+          retryCount = 0;
+          return;
+        }
+
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT"
+        ) {
+          if (retryCount >= 3) {
+            console.warn(
+              "Realtime pentru notificări nu este disponibil momentan. Se folosește actualizarea periodică."
+            );
+
+            return;
+          }
+
+          retryCount += 1;
+
+          if (retryTimeout !== null) {
+            window.clearTimeout(retryTimeout);
+          }
+
+          retryTimeout = window.setTimeout(
+            () => {
+              void subscribeToNotifications(
+                userId
+              );
+            },
+            retryCount * 3000
+          );
+        }
+      });
+    }
+
+    async function initializeNotifications() {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!isActive) {
+        return;
+      }
+
+      if (userError || !user) {
+        setNotifications([]);
+        setLoading(false);
+        return;
+      }
+
+      await refreshNotifications(user.id);
+
+      if (!isActive) {
+        return;
+      }
+
+      await subscribeToNotifications(user.id);
+
+      pollingInterval = window.setInterval(
+        () => {
+          void refreshNotifications(user.id);
+        },
+        30000
+      );
+    }
+
+    void initializeNotifications();
 
     return () => {
+      isActive = false;
+
+      if (retryTimeout !== null) {
+        window.clearTimeout(retryTimeout);
+      }
+
+      if (pollingInterval !== null) {
+        window.clearInterval(
+          pollingInterval
+        );
+      }
+
       if (channel) {
-        supabase.removeChannel(channel);
+        void supabase.removeChannel(channel);
+        channel = null;
       }
     };
   }, []);
 
   const unreadCount = notifications.filter(
-    (notification) => !notification.is_read
+    (notification) =>
+      !notification.is_read
   ).length;
 
-  const markAsRead = async (notificationId: string) => {
-    await markNotificationAsRead(notificationId);
+  const markAsRead = async (
+    notificationId: string
+  ) => {
+    const { error } =
+      await markNotificationAsRead(
+        notificationId
+      );
 
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === notificationId
-          ? { ...notification, is_read: true }
-          : notification
-      )
+    if (error) {
+      console.error(
+        "Eroare la marcarea notificării:",
+        error
+      );
+
+      return;
+    }
+
+    setNotifications(
+      (previousNotifications) =>
+        previousNotifications.map(
+          (notification) =>
+            notification.id === notificationId
+              ? {
+                  ...notification,
+                  is_read: true,
+                }
+              : notification
+        )
     );
   };
 
@@ -102,15 +334,32 @@ export function useNotifications() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
-    await markAllNotificationsAsRead(user.id);
+    const { error } =
+      await markAllNotificationsAsRead(
+        user.id
+      );
 
-    setNotifications((prev) =>
-      prev.map((notification) => ({
-        ...notification,
-        is_read: true,
-      }))
+    if (error) {
+      console.error(
+        "Eroare la marcarea tuturor notificărilor:",
+        error
+      );
+
+      return;
+    }
+
+    setNotifications(
+      (previousNotifications) =>
+        previousNotifications.map(
+          (notification) => ({
+            ...notification,
+            is_read: true,
+          })
+        )
     );
   };
 

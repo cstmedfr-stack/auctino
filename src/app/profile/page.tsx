@@ -7,6 +7,7 @@ import StatisticsCard from "@/components/profile/StatisticsCard";
 import { useProfile } from "@/hooks/useProfile";
 import TrustScoreCard from "@/components/profile/TrustScoreCard";
 import { calculateTrustScore } from "@/utils/trustScore";
+import ProfileHeader from "@/components/profile/ProfileHeader";
 
 export default function ProfilePage() {
   const { profile, loading } = useProfile();
@@ -28,7 +29,13 @@ export default function ProfilePage() {
       </main>
     );
   }
-console.log(profile);
+
+  console.log({
+  ProfileHeader,
+  VerificationCard,
+  StatisticsCard,
+  TrustScoreCard,
+});
   return (
     <main className="min-h-screen bg-slate-50 p-8">
       <div className="mx-auto max-w-7xl">

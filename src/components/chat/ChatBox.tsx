@@ -88,12 +88,18 @@ export default function ChatBox({
                   <p>{msg.content}</p>
 
                   <p
-                    className={`mt-1 text-[10px] ${
-                      isMine ? "text-gray-300" : "text-gray-400"
-                    }`}
-                  >
-                    {new Date(msg.created_at).toLocaleString("ro-RO")}
-                  </p>
+  className={`mt-1 text-[10px] ${
+    isMine ? "text-gray-300" : "text-gray-400"
+  }`}
+>
+  {new Date(msg.created_at).toLocaleString("ro-RO")}
+
+  {isMine && (
+    <span className="ml-2">
+      {msg.is_read ? "✓✓ citit" : "✓ trimis"}
+    </span>
+  )}
+</p>
                 </div>
               </div>
             );

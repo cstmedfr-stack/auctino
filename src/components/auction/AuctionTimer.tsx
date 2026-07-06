@@ -1,59 +1,142 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type AuctionTimerProps = {
   auctionEnd: string | null;
+  onEnd?: () => void;
 };
 
-function formatTimeLeft(ms: number) {
-  if (ms <= 0) return "Încheiată";
+function formatRemainingTime(
+  totalSeconds: number
+) {
+  const seconds = Math.max(
+    totalSeconds,
+    0
+  );
 
-  const totalSeconds = Math.floor(ms / 1000);
-  const days = Math.floor(totalSeconds / (60 * 60 * 24));
-  const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
-  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-  const seconds = totalSeconds % 60;
+  const days = Math.floor(
+    seconds / 86400
+  );
 
-  if (days > 0) return `${days}z ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m ${seconds}s`;
+  const hours = Math.floor(
+    (seconds % 86400) / 3600
+  );
+
+  const minutes = Math.floor(
+    (seconds % 3600) / 60
+  );
+
+  const remainingSeconds =
+    seconds % 60;
+
+  if (days > 0) {
+    return `${days}z ${hours}h ${minutes}m`;
+  }
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  }
+
+  return `${minutes}m ${remainingSeconds}s`;
 }
 
-export default function AuctionTimer({ auctionEnd }: AuctionTimerProps) {
-  const [timeLeft, setTimeLeft] = useState("");
-  const [isEnded, setIsEnded] = useState(false);
+export default function AuctionTimer({
+  auctionEnd,
+  onEnd,
+}: AuctionTimerProps) {
+  const [remaining, setRemaining] =
+    useState("");
+
+  const [isEndingSoon, setIsEndingSoon] =
+    useState(false);
 
   useEffect(() => {
     if (!auctionEnd) {
-      setTimeLeft("Fără termen");
+      setRemaining("Fără termen");
+      setIsEndingSoon(false);
       return;
     }
 
-    const updateTimer = () => {
-      const endTime = new Date(auctionEnd).getTime();
-      const diff = endTime - Date.now();
+    function updateTimer() {
+      const endTimestamp =
+        new Date(
+          auctionEnd as string
+        ).getTime();
 
-      setIsEnded(diff <= 0);
-      setTimeLeft(formatTimeLeft(diff));
+      const difference =
+        endTimestamp - Date.now();
+
+      if (
+        !Number.isFinite(
+          endTimestamp
+        ) ||
+        difference <= 0
+      ) {
+        setRemaining(
+          "Licitație încheiată"
+        );
+
+        setIsEndingSoon(false);
+        onEnd?.();
+
+        return true;
+      }
+
+      setRemaining(
+        formatRemainingTime(
+          Math.floor(
+            difference / 1000
+          )
+        )
+      );
+
+      setIsEndingSoon(
+        difference <=
+          10 * 60 * 1000
+      );
+
+      return false;
+    }
+
+    const alreadyEnded =
+      updateTimer();
+
+    if (alreadyEnded) {
+      return;
+    }
+
+    const intervalId =
+      window.setInterval(() => {
+        const ended =
+          updateTimer();
+
+        if (ended) {
+          window.clearInterval(
+            intervalId
+          );
+        }
+      }, 1000);
+
+    return () => {
+      window.clearInterval(
+        intervalId
+      );
     };
-
-    updateTimer();
-
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [auctionEnd]);
+  }, [auctionEnd, onEnd]);
 
   return (
     <span
-      className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-        isEnded
-          ? "bg-red-50 text-red-600"
-          : "bg-orange-50 text-orange-600"
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+        isEndingSoon
+          ? "bg-red-100 text-red-700"
+          : "bg-orange-100 text-orange-700"
       }`}
     >
-      ⏳ {timeLeft}
+      ⏳ {remaining}
     </span>
   );
 }

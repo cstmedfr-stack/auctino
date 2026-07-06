@@ -5,9 +5,24 @@ import ProductCard from "./ProductCard";
 
 type ProductGridProps = {
   products: Product[];
+
   favoriteIds?: string[];
-  onToggleFavorite?: (productId: string) => void;
-  onDeleteProduct?: (productId: string) => void;
+
+  onToggleFavorite?: (
+    productId: string
+  ) => void;
+
+  onDeleteProduct?: (
+    productId: string
+  ) => void;
+
+  onRelistProduct?: (
+    productId: string,
+    durationDays: number
+  ) => Promise<void> | void;
+
+  relistingProductId?: string | null;
+
   showFavorite?: boolean;
   mode?: "marketplace" | "owner";
 };
@@ -17,6 +32,8 @@ export default function ProductGrid({
   favoriteIds = [],
   onToggleFavorite,
   onDeleteProduct,
+  onRelistProduct,
+  relistingProductId = null,
   showFavorite = true,
   mode = "marketplace",
 }: ProductGridProps) {
@@ -26,9 +43,22 @@ export default function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
-          isFavorite={favoriteIds.includes(product.id)}
-          onToggleFavorite={onToggleFavorite}
-          onDeleteProduct={onDeleteProduct}
+          isFavorite={favoriteIds.includes(
+            product.id
+          )}
+          onToggleFavorite={
+            onToggleFavorite
+          }
+          onDeleteProduct={
+            onDeleteProduct
+          }
+          onRelistProduct={
+            onRelistProduct
+          }
+          relisting={
+            relistingProductId ===
+            product.id
+          }
           showFavorite={showFavorite}
           mode={mode}
         />

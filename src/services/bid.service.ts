@@ -1,27 +1,73 @@
 import { supabase } from "@/lib/supabase";
-import { createNotification } from "./notification.service";
+
+type PlaceBidProduct = {
+  id: string;
+  user_id: string;
+  title: string;
+  current_price: number | null;
+  starting_price: number;
+  bid_count: number | null;
+  status: string | null;
+  auction_end: string | null;
+  
+};
+
+type PlaceBidArguments = {
+  product: PlaceBidProduct;
+  bidderId: string;
+  amount: number;
+};
+
+type PlaceBidRpcResult = {
+  bid_id: string;
+  current_price: number;
+  bid_count: number;
+  previous_highest_amount: number | null;
+  auction_end: string | null;
+auction_extended: boolean;
+};
 
 export async function placeBid({
   product,
   bidderId,
   amount,
-}: {
-  product: {
-    id: string;
-    user_id: string;
-    title: string;
-    current_price: number | null;
-    starting_price: number;
-    bid_count: number | null;
-    status: string | null;
-    auction_end: string | null;
-  };
-  bidderId: string;
-  amount: number;
-}) {
-  const currentPrice = product.current_price ?? product.starting_price;
+}: PlaceBidArguments) {
+  /*
+   * Verificări rapide în interfață.
+   * Funcția SQL repetă toate verificările și rămâne
+   * sursa reală de adevăr.
+   */
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (amount <= currentPrice) {
+  if (userError || !user) {
+    throw new Error(
+      "Trebuie să fii autentificat pentru a licita."
+    );
+  }
+
+  if (user.id !== bidderId) {
+    throw new Error(
+      "Identitatea ofertantului nu este validă."
+    );
+  }
+
+  if (user.id === product.user_id) {
+    throw new Error(
+      "Nu poți licita la propriul produs."
+    );
+  }
+
+  const currentPrice =
+    product.current_price ??
+    product.starting_price;
+
+  if (
+    !Number.isFinite(amount) ||
+    amount <= currentPrice
+  ) {
     throw new Error(
       `Oferta trebuie să fie mai mare decât ${currentPrice} lei.`
     );
@@ -29,68 +75,62 @@ export async function placeBid({
 
   const auctionEnded =
     product.auction_end !== null &&
-    new Date(product.auction_end).getTime() <= Date.now();
+    new Date(product.auction_end).getTime() <=
+      Date.now();
 
-  if (auctionEnded || product.status === "ended") {
-    throw new Error("Licitația este încheiată.");
-  }
-
-  const { data: previousHighestBid } = await supabase
-    .from("bids")
-    .select("user_id, amount")
-    .eq("product_id", product.id)
-    .order("amount", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { error: bidError } = await supabase.from("bids").insert({
-    product_id: product.id,
-    user_id: bidderId,
-    amount,
-  });
-
-  if (bidError) {
-    throw new Error(bidError.message);
-  }
-
-  const { error: productError } = await supabase
-    .from("products")
-    .update({
-      current_price: amount,
-      bid_count: (product.bid_count ?? 0) + 1,
-    })
-    .eq("id", product.id);
-
-  if (productError) {
-    throw new Error(productError.message);
-  }
-
-  if (bidderId !== product.user_id) {
-    await createNotification({
-      userId: product.user_id,
-      productId: product.id,
-      title: "Ai primit o ofertă nouă",
-      message: `Produsul tău "${product.title}" a primit o ofertă de ${amount} lei.`,
-      type: "new_bid",
-    });
-  }
+  const closedStatuses = [
+    "ended",
+    "expired",
+    "transaction_pending",
+    "sold",
+    "removed",
+  ];
 
   if (
-    previousHighestBid &&
-    previousHighestBid.user_id !== bidderId &&
-    previousHighestBid.user_id !== product.user_id
+    auctionEnded ||
+    closedStatuses.includes(
+      product.status ?? ""
+    )
   ) {
-    await createNotification({
-      userId: previousHighestBid.user_id,
-      productId: product.id,
-      title: "Ai fost depășit la licitație",
-      message: `Oferta ta pentru "${product.title}" a fost depășită. Noua ofertă este ${amount} lei.`,
-      type: "outbid",
-    });
+    throw new Error(
+      "Licitația este încheiată."
+    );
   }
 
+  const { data, error } = await supabase.rpc(
+    "place_bid_atomic",
+    {
+      p_product_id: product.id,
+      p_amount: amount,
+    }
+  );
+
+  if (error) {
+    throw new Error(
+      error.message ||
+        "Oferta nu a putut fi plasată."
+    );
+  }
+
+  if (!data || typeof data !== "object") {
+    throw new Error(
+      "Răspunsul primit după plasarea ofertei nu este valid."
+    );
+  }
+
+  const result =
+    data as PlaceBidRpcResult;
+
   return {
-    current_price: amount,
-    bid_count: (product.bid_count ?? 0) + 1,
-  };
+  current_price: Number(
+    result.current_price
+  ),
+  bid_count: Number(
+    result.bid_count
+  ),
+  auction_end:
+    result.auction_end ?? null,
+  auction_extended:
+    Boolean(result.auction_extended),
+};
 }

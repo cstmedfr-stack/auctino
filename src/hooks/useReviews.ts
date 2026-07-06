@@ -1,46 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Review } from "@/types/review";
-import { getUserReviews } from "@/services/review.service";
+import {
+  getAverageRating,
+  getUserReviews,
+} from "@/services/review.service";
 
 export function useReviews(userId: string) {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
+  const loadReviews = useCallback(async () => {
     if (!userId) {
+      setReviews([]);
+      setAverageRating(0);
+      setError("");
       setLoading(false);
       return;
     }
 
-    const loadReviews = async () => {
-      setLoading(true);
+    setLoading(true);
+    setError("");
 
-      const { data, error } = await getUserReviews(userId);
+    try {
+      const { data, error: reviewsError } =
+        await getUserReviews(userId);
 
-      if (error) {
-        console.error(error.message);
+      if (reviewsError) {
+        setReviews([]);
+        setError(reviewsError.message);
       } else {
-        setReviews(data || []);
+        setReviews((data ?? []) as Review[]);
       }
 
-      setLoading(false);
-    };
+      const rating = await getAverageRating(userId);
 
-    loadReviews();
+      setAverageRating(
+        Number.isFinite(Number(rating))
+          ? Number(rating)
+          : 0
+      );
+    } catch (loadError) {
+      console.error("Eroare încărcare review-uri:", loadError);
+
+      setReviews([]);
+      setAverageRating(0);
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Review-urile nu au putut fi încărcate."
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
-  const averageRating =
-    reviews.length === 0
-      ? 0
-      : reviews.reduce((sum, review) => sum + review.rating, 0) /
-        reviews.length;
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   return {
     reviews,
     averageRating,
     reviewsCount: reviews.length,
     loading,
+    error,
+    refreshReviews: loadReviews,
   };
 }

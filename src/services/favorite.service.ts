@@ -1,49 +1,75 @@
 import { supabase } from "@/lib/supabase";
 
-export async function getUserFavorites(userId: string) {
+export async function getUserFavorites(
+  userId: string
+) {
+  /*
+   * Parametrul este păstrat pentru compatibilitate.
+   * RLS returnează automat doar favoritele contului
+   * autentificat.
+   */
+  void userId;
+
   return await supabase
     .from("favorites")
-    .select("product_id")
-    .eq("user_id", userId);
+    .select("product_id");
 }
 
 export async function addFavorite(
   userId: string,
   productId: string
 ) {
-  return await supabase.from("favorites").insert({
-    user_id: userId,
-    product_id: productId,
-  });
+  /*
+   * Identitatea reală este stabilită prin auth.uid().
+   */
+  void userId;
+
+  return await supabase.rpc(
+    "set_own_favorite",
+    {
+      p_product_id: productId,
+      p_should_be_favorite: true,
+    }
+  );
 }
 
 export async function removeFavorite(
   userId: string,
   productId: string
 ) {
-  return await supabase
-    .from("favorites")
-    .delete()
-    .eq("user_id", userId)
-    .eq("product_id", productId);
+  void userId;
+
+  return await supabase.rpc(
+    "set_own_favorite",
+    {
+      p_product_id: productId,
+      p_should_be_favorite: false,
+    }
+  );
 }
 
 export async function isFavorite(
   userId: string,
   productId: string
 ) {
-  return await supabase
-    .from("favorites")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("product_id", productId)
-    .maybeSingle();
+  void userId;
+
+  return await supabase.rpc(
+    "is_own_favorite",
+    {
+      p_product_id: productId,
+    }
+  );
 }
-export async function getFavoriteProducts(userId: string) {
+
+export async function getFavoriteProducts(
+  userId: string
+) {
+  void userId;
+
   return await supabase
     .from("favorites")
-    .select(
-      `
+    .select(`
       id,
       product_id,
       products (
@@ -60,7 +86,5 @@ export async function getFavoriteProducts(userId: string) {
         status,
         created_at
       )
-    `
-    )
-    .eq("user_id", userId);
+    `);
 }

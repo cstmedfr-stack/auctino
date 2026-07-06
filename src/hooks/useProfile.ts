@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getProfile } from "@/services/profile.service";
+import { Profile } from "@/types/profile";
 
 export function useProfile() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function useProfile() {
       if (error) {
         console.error(error.message);
       } else {
-        setProfile(data);
+        setProfile(data as Profile);
       }
 
       setLoading(false);
