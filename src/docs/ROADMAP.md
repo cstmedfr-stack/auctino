@@ -1,4 +1,4 @@
-# Vendora Roadmap
+# Auctino Roadmap
 
 ## Faza 1 — Beta România
 

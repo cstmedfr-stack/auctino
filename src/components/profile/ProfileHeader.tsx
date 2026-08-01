@@ -1,3 +1,4 @@
+import { UserRound } from "lucide-react";
 type ProfileHeaderProps = {
   fullName: string;
   avatarUrl?: string | null;
@@ -17,9 +18,9 @@ export default function ProfileHeader({
             className="h-28 w-28 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-slate-200 text-4xl">
-            👤
-          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+  <UserRound size={28} />
+</div>
         )}
 
         <h1 className="mt-5 text-3xl font-bold text-slate-900">

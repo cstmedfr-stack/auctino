@@ -22,8 +22,7 @@ export async function closeAuction(
 
   if (error) {
     throw new Error(
-      error.message ||
-        "Licitația nu a putut fi închisă."
+      error.message || "auction_close_failed"
     );
   }
 

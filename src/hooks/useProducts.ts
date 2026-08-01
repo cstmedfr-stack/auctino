@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import { Product } from "@/types/product";
+import { useMessages } from "@/i18n/useMessages";
 
 import {
   getMarketplaceProducts,
@@ -19,6 +20,9 @@ const PAGE_SIZE = 24;
 export function useProducts(
   filters: MarketplaceProductFilters
 ) {
+  const messages = useMessages();
+  const t = messages.marketplace;
+
   const [products, setProducts] =
     useState<Product[]>([]);
 
@@ -104,29 +108,23 @@ export function useProducts(
         return;
       }
 
-      if (
-        productsError ||
-        !data
-      ) {
+      if (productsError || !data) {
+        console.error(
+          t.productsLoadError,
+          productsError?.message
+        );
+
         setProducts([]);
         setTotalCount(0);
         setHasMore(false);
         setPage(1);
-
-        setError(
-          productsError?.message ||
-            "Produsele nu au putut fi încărcate."
-        );
-
+        setError(t.productsLoadError);
         setLoading(false);
         return;
       }
 
       setProducts(data.items);
-      setTotalCount(
-        data.totalCount
-      );
-
+      setTotalCount(data.totalCount);
       setHasMore(data.hasMore);
       setPage(1);
       setLoading(false);
@@ -139,6 +137,7 @@ export function useProducts(
       minPrice,
       maxPrice,
       sort,
+      t.productsLoadError,
     ]);
 
   useEffect(() => {
@@ -194,48 +193,38 @@ export function useProducts(
         return;
       }
 
-      if (
-        productsError ||
-        !data
-      ) {
-        setError(
-          productsError?.message ||
-            "Nu au putut fi încărcate mai multe produse."
+      if (productsError || !data) {
+        console.error(
+          t.productsLoadMoreError,
+          productsError?.message
         );
 
+        setError(t.productsLoadMoreError);
         setLoadingMore(false);
         return;
       }
 
-      setProducts(
-        (currentProducts) => {
-          const existingIds =
-            new Set(
-              currentProducts.map(
-                (product) =>
-                  product.id
-              )
-            );
+      setProducts((currentProducts) => {
+        const existingIds =
+          new Set(
+            currentProducts.map(
+              (product) => product.id
+            )
+          );
 
-          const newProducts =
-            data.items.filter(
-              (product) =>
-                !existingIds.has(
-                  product.id
-                )
-            );
+        const newProducts =
+          data.items.filter(
+            (product) =>
+              !existingIds.has(product.id)
+          );
 
-          return [
-            ...currentProducts,
-            ...newProducts,
-          ];
-        }
-      );
+        return [
+          ...currentProducts,
+          ...newProducts,
+        ];
+      });
 
-      setTotalCount(
-        data.totalCount
-      );
-
+      setTotalCount(data.totalCount);
       setHasMore(data.hasMore);
       setPage(nextPage);
       setLoadingMore(false);
@@ -252,6 +241,7 @@ export function useProducts(
       minPrice,
       maxPrice,
       sort,
+      t.productsLoadMoreError,
     ]);
 
   return {

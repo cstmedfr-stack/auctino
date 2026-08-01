@@ -1,18 +1,17 @@
+"use client";
+
 import ProductForm from "@/components/forms/ProductForm";
+import ProductFormPageHeader from "@/components/forms/ProductFormPageHeader";
 
 export default function AddProductPage() {
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
-          Adaugă produs
-        </h1>
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl">
+        <ProductFormPageHeader mode="create" />
 
-        <p className="mb-8 text-gray-600">
-          Completează detaliile produsului și adaugă o imagine.
-        </p>
-
-        <ProductForm mode="create" />
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <ProductForm mode="create" />
+        </section>
       </div>
     </main>
   );

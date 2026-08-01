@@ -5,24 +5,18 @@ import ProductCard from "./ProductCard";
 
 type ProductGridProps = {
   products: Product[];
-
   favoriteIds?: string[];
-
   onToggleFavorite?: (
     productId: string
   ) => void;
-
   onDeleteProduct?: (
     productId: string
   ) => void;
-
   onRelistProduct?: (
     productId: string,
     durationDays: number
   ) => Promise<void> | void;
-
   relistingProductId?: string | null;
-
   showFavorite?: boolean;
   mode?: "marketplace" | "owner";
 };
@@ -38,11 +32,12 @@ export default function ProductGrid({
   mode = "marketplace",
 }: ProductGridProps) {
   return (
-    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {products.map((product) => (
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+      {products.map((product, index) => (
         <ProductCard
           key={product.id}
           product={product}
+          imagePriority={index === 0}
           isFavorite={favoriteIds.includes(
             product.id
           )}
@@ -56,8 +51,7 @@ export default function ProductGrid({
             onRelistProduct
           }
           relisting={
-            relistingProductId ===
-            product.id
+            relistingProductId === product.id
           }
           showFavorite={showFavorite}
           mode={mode}

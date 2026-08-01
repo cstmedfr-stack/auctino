@@ -22,6 +22,15 @@ export type NotificationType =
  | "auction_ending_soon"
   | (string & {});
 
+  export type NotificationMetadata = {
+  productTitle?: string;
+  amount?: number | string;
+  currency?: "RON" | "EUR";
+  recipientRole?: "seller" | "buyer";
+  confirmedBy?: "seller" | "buyer";
+  outcome?: "no_bids";
+  [key: string]: unknown;
+};
 export interface Notification {
   id: string;
   user_id: string;
@@ -37,4 +46,5 @@ export interface Notification {
   is_read: boolean;
   created_at: string;
   event_key?: string | null;
+  metadata?: NotificationMetadata | null;
 }

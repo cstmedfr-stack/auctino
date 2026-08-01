@@ -1,17 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import {
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 import { useUserProducts } from "@/hooks/useUserProducts";
 import ProductGrid from "@/components/product/ProductGrid";
+import MyProductsHeader from "@/components/product/MyProductsHeader";
+import MyProductsState from "@/components/product/MyProductsState";
+import { useMessages } from "@/i18n/useMessages";
 
 import {
   deleteProduct,
   relistExpiredProduct,
 } from "@/services/product.service";
 
+type PageNotice = {
+  type: "success" | "error";
+  message: string;
+};
+
 export default function MyProductsPage() {
+  const messages = useMessages();
+  const t = messages.myProducts;
+
   const {
     products,
     loading,
@@ -24,26 +38,58 @@ export default function MyProductsPage() {
     setRelistingProductId,
   ] = useState<string | null>(null);
 
-  const handleDeleteProduct = async (
+  const [
+    deleteConfirmationProductId,
+    setDeleteConfirmationProductId,
+  ] = useState<string | null>(null);
+
+  const [notice, setNotice] =
+    useState<PageNotice | null>(null);
+
+  const [
+    deletingProductId,
+    setDeletingProductId,
+  ] = useState<string | null>(null);
+
+  const requestDeleteProduct = (
     productId: string
   ) => {
-    const confirmed = window.confirm(
-      "Ești sigură că vrei să ștergi acest produs? Această acțiune nu poate fi anulată."
-    );
+    setNotice(null);
+    setDeleteConfirmationProductId(productId);
+  };
 
-    if (!confirmed) return;
-
-    const { error: deleteError } =
-      await deleteProduct(productId);
-
-    if (deleteError) {
-      alert(
-        deleteError.message ||
-          "A apărut o eroare la ștergerea produsului."
-      );
-
+  const confirmDeleteProduct = async () => {
+    if (!deleteConfirmationProductId) {
       return;
     }
+
+    setDeletingProductId(deleteConfirmationProductId);
+    setNotice(null);
+
+    const { error: deleteError } =
+      await deleteProduct(
+        deleteConfirmationProductId
+      );
+
+    if (deleteError) {
+      setNotice({
+        type: "error",
+        message:
+          deleteError.message ||
+          t.deleteError,
+      });
+
+      setDeletingProductId(null);
+      return;
+    }
+
+    setDeleteConfirmationProductId(null);
+    setDeletingProductId(null);
+
+    setNotice({
+      type: "success",
+      message: t.deleteSuccess,
+    });
 
     await refresh();
   };
@@ -53,6 +99,7 @@ export default function MyProductsPage() {
     durationDays: number
   ) => {
     setRelistingProductId(productId);
+    setNotice(null);
 
     const { error: relistError } =
       await relistExpiredProduct(
@@ -61,10 +108,12 @@ export default function MyProductsPage() {
       );
 
     if (relistError) {
-      alert(
-        relistError.message ||
-          "Produsul nu a putut fi relistat."
-      );
+      setNotice({
+        type: "error",
+        message:
+          relistError.message ||
+          t.relistError,
+      });
 
       setRelistingProductId(null);
       return;
@@ -74,69 +123,101 @@ export default function MyProductsPage() {
 
     setRelistingProductId(null);
 
-    alert(
-      `Produsul a fost relistat pentru ${durationDays} zile.`
-    );
+    setNotice({
+      type: "success",
+      message: t.relistSuccess.replace(
+        "{days}",
+        String(durationDays)
+      ),
+    });
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Produsele mele
-            </h1>
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <MyProductsHeader
+          productsCount={products.length}
+        />
 
-            <p className="mt-2 text-gray-600">
-              Aici vezi toate produsele pe care
-              le-ai adăugat.
-            </p>
-          </div>
-
-          <Link
-            href="/add-product"
-            className="rounded-xl bg-black px-5 py-3 text-center font-semibold text-white hover:bg-gray-800"
+        {notice && (
+          <div
+            className={`mb-6 flex items-start gap-2 rounded-2xl px-4 py-3 text-sm font-semibold ${
+              notice.type === "success"
+                ? "bg-green-50 text-green-700"
+                : "bg-red-50 text-red-700"
+            }`}
           >
-            Adaugă produs
-          </Link>
-        </div>
+            {notice.type === "success" ? (
+              <CheckCircle2
+                size={18}
+                className="mt-0.5 shrink-0"
+              />
+            ) : (
+              <AlertTriangle
+                size={18}
+                className="mt-0.5 shrink-0"
+              />
+            )}
 
-        {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
-            {error}
+            {notice.message}
           </div>
         )}
 
-        {loading ? (
-          <p className="text-gray-600">
-            Se încarcă produsele tale...
-          </p>
-        ) : products.length === 0 ? (
-          <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">
-              Nu ai adăugat produse încă
-            </h2>
-
-            <p className="mb-6 text-gray-600">
-              Adaugă primul produs pentru a începe
-              să vinzi.
+        {deleteConfirmationProductId && (
+          <section className="mb-6 rounded-3xl border border-red-200 bg-red-50 p-5">
+            <p className="font-black text-red-950">
+              {t.deleteConfirmTitle}
             </p>
 
-            <Link
-              href="/add-product"
-              className="rounded-xl bg-black px-5 py-3 font-semibold text-white hover:bg-gray-800"
-            >
-              Adaugă primul produs
-            </Link>
-          </div>
+            <p className="mt-2 text-sm leading-6 text-red-700">
+              {t.deleteConfirmDescription}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  void confirmDeleteProduct();
+                }}
+                disabled={deletingProductId !== null}
+                className="rounded-2xl bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-800 disabled:opacity-60"
+              >
+                {t.confirmDelete}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setDeleteConfirmationProductId(null)
+                }
+                disabled={deletingProductId !== null}
+                className="rounded-2xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+              >
+                {t.cancelAction}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {error && !loading ? (
+          <MyProductsState
+            type="error"
+            message={error}
+            onRetry={() => {
+              void refresh();
+            }}
+          />
+        ) : loading ? (
+          <MyProductsState type="loading" />
+        ) : products.length === 0 ? (
+          <MyProductsState type="empty" />
         ) : (
           <ProductGrid
             products={products}
             showFavorite={false}
             mode="owner"
             onDeleteProduct={
-              handleDeleteProduct
+              requestDeleteProduct
             }
             onRelistProduct={
               handleRelistProduct

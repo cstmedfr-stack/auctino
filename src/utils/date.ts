@@ -1,37 +1,82 @@
-export function formatChatTime(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
+type SupportedLocale = "ro" | "fr";
 
-  const diffMs = now.getTime() - date.getTime();
-  const diffMinutes = Math.floor(diffMs / 1000 / 60);
-
-  if (diffMinutes < 1) {
-    return "Acum";
+function getFormattingLocale(locale: string = "ro") {
+  if (locale === "fr") {
+    return "fr-FR";
   }
 
-  if (diffMinutes < 60) {
-    return `${diffMinutes} min`;
+  return "ro-RO";
+}
+
+export function formatTime(
+  value: string | Date | null | undefined,
+  locale: SupportedLocale = "ro"
+) {
+  if (!value) {
+    return "";
   }
 
-  const isToday = date.toDateString() === now.toDateString();
+  const date =
+    value instanceof Date ? value : new Date(value);
 
-  if (isToday) {
-    return date.toLocaleTimeString("ro-RO", {
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleTimeString(
+    getFormattingLocale(locale),
+    {
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }
+  );
+}
+
+export function formatDate(
+  value: string | Date | null | undefined,
+  locale: SupportedLocale = "ro"
+) {
+  if (!value) {
+    return "";
   }
 
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
+  const date =
+    value instanceof Date ? value : new Date(value);
 
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-
-  if (isYesterday) {
-    return "Ieri";
+  if (Number.isNaN(date.getTime())) {
+    return "";
   }
 
-  return date.toLocaleDateString("ro-RO", {
-    weekday: "short",
-  });
+  return date.toLocaleDateString(
+    getFormattingLocale(locale),
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
+}
+
+export function formatDateTime(
+  value: string | Date | null | undefined,
+  locale: SupportedLocale = "ro"
+) {
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(
+    getFormattingLocale(locale),
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
+  ).format(date);
 }

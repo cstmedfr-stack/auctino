@@ -1,4 +1,4 @@
-# Vendora Architecture
+# Auctino Architecture
 
 ## Modules
 

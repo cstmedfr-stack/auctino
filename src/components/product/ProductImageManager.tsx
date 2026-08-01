@@ -4,8 +4,20 @@ import {
   useEffect,
   useState,
 } from "react";
+import type { ChangeEvent } from "react";
+import Image from "next/image";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FileImage,
+  ImageIcon,
+  Loader2,
+  Trash2,
+  UploadCloud,
+} from "lucide-react";
 
 import { ProductImage } from "@/types/productImage";
+import { useMessages } from "@/i18n/useMessages";
 
 import {
   deleteProductImage,
@@ -27,10 +39,125 @@ const ALLOWED_TYPES = [
   "image/webp",
 ];
 
+function formatMessage(
+  template: string,
+  values: Record<string, string | number>
+) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) =>
+      result.replace(
+        `{${key}}`,
+        String(value)
+      ),
+    template
+  );
+}
+
+function getProductImageServiceErrorMessage(
+  message: string,
+  t: {
+    invalidType: string;
+    oversized: string;
+    remainingSlots: string;
+    maxImagesSelected: string;
+    authRequired: string;
+    cannotModify: string;
+    notOwner: string;
+    registerError: string;
+    uploadError: string;
+    deleteError: string;
+  }
+) {
+  if (
+    message.startsWith(
+      "product_image_invalid_type|"
+    )
+  ) {
+    const file = message.replace(
+      "product_image_invalid_type|",
+      ""
+    );
+
+    return formatMessage(t.invalidType, {
+      file,
+    });
+  }
+
+  if (
+    message.startsWith(
+      "product_image_oversized|"
+    )
+  ) {
+    const file = message.replace(
+      "product_image_oversized|",
+      ""
+    );
+
+    return formatMessage(t.oversized, {
+      file,
+    });
+  }
+
+  if (
+    message.startsWith(
+      "product_image_remaining_slots|"
+    )
+  ) {
+    const count = message.replace(
+      "product_image_remaining_slots|",
+      ""
+    );
+
+    return formatMessage(t.remainingSlots, {
+      count,
+    });
+  }
+
+  if (
+    message ===
+    "product_image_max_reached"
+  ) {
+    return t.maxImagesSelected;
+  }
+
+  if (
+    message ===
+    "product_image_auth_required"
+  ) {
+    return t.authRequired;
+  }
+
+  if (
+    message ===
+    "product_image_cannot_modify"
+  ) {
+    return t.cannotModify;
+  }
+
+  if (
+    message ===
+    "product_image_not_owner"
+  ) {
+    return t.notOwner;
+  }
+
+  if (
+    message ===
+    "product_image_register_failed"
+  ) {
+    return t.registerError;
+  }
+
+  return message || t.uploadError;
+}
+
 export default function ProductImageManager({
   productId,
   userId,
 }: Props) {
+  const messages = useMessages();
+  const t = messages.productImageManager;
+
   const [images, setImages] =
     useState<ProductImage[]>([]);
 
@@ -45,6 +172,9 @@ export default function ProductImageManager({
 
   const [deletingImageId, setDeletingImageId] =
     useState<string | null>(null);
+  
+  const [  deleteConfirmationImageId,  setDeleteConfirmationImageId,
+] = useState<string | null>(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -74,8 +204,15 @@ export default function ProductImageManager({
     void loadImages();
   }, [productId]);
 
+  function resetFileInput() {
+    setFiles([]);
+    setInputKey(
+      (currentKey) => currentKey + 1
+    );
+  }
+
   function handleFileSelection(
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) {
     setError("");
     setSuccess("");
@@ -98,13 +235,12 @@ export default function ProductImageManager({
 
     if (invalidTypeFile) {
       setError(
-        `"${invalidTypeFile.name}" nu este într-un format acceptat. Folosește JPEG, PNG sau WebP.`
+        formatMessage(t.invalidType, {
+          file: invalidTypeFile.name,
+        })
       );
 
-      setFiles([]);
-      setInputKey(
-        (currentKey) => currentKey + 1
-      );
+      resetFileInput();
       return;
     }
 
@@ -116,13 +252,12 @@ export default function ProductImageManager({
 
     if (oversizedFile) {
       setError(
-        `"${oversizedFile.name}" depășește limita de 5 MB.`
+        formatMessage(t.oversized, {
+          file: oversizedFile.name,
+        })
       );
 
-      setFiles([]);
-      setInputKey(
-        (currentKey) => currentKey + 1
-      );
+      resetFileInput();
       return;
     }
 
@@ -136,14 +271,16 @@ export default function ProductImageManager({
 
       setError(
         remainingSlots > 0
-          ? `Mai poți selecta maximum ${remainingSlots} imagini.`
-          : "Produsul are deja numărul maxim de 8 imagini."
+          ? formatMessage(
+              t.remainingSlots,
+              {
+                count: remainingSlots,
+              }
+            )
+          : t.maxImagesSelected
       );
 
-      setFiles([]);
-      setInputKey(
-        (currentKey) => currentKey + 1
-      );
+      resetFileInput();
       return;
     }
 
@@ -154,6 +291,8 @@ export default function ProductImageManager({
     if (files.length === 0) {
       return;
     }
+
+    const uploadedCount = files.length;
 
     setUploading(true);
     setError("");
@@ -166,131 +305,178 @@ export default function ProductImageManager({
         files
       );
 
-      setFiles([]);
-      setInputKey(
-        (currentKey) => currentKey + 1
-      );
+      resetFileInput();
 
       await loadImages();
 
       setSuccess(
-        files.length === 1
-          ? "Imaginea a fost adăugată."
-          : "Imaginile au fost adăugate."
+        uploadedCount === 1
+          ? t.uploadSingleSuccess
+          : t.uploadMultipleSuccess
       );
     } catch (uploadError) {
-      setError(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Imaginile nu au putut fi încărcate."
-      );
+     setError(
+  uploadError instanceof Error
+    ? getProductImageServiceErrorMessage(
+        uploadError.message,
+        t
+      )
+    : t.uploadError
+);
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleDelete(
-    imageId: string
-  ) {
-    const confirmed = window.confirm(
-      "Ești sigură că vrei să ștergi această imagine?"
+ async function handleDelete(imageId: string) {
+  setDeletingImageId(imageId);
+  setDeleteConfirmationImageId(null);
+  setError("");
+  setSuccess("");
+
+  try {
+    await deleteProductImage(imageId);
+    await loadImages();
+
+    setSuccess(t.deleteSuccess);
+  } catch (deleteError) {
+    setError(
+      deleteError instanceof Error
+        ? getProductImageServiceErrorMessage(
+            deleteError.message,
+            t
+          )
+        : t.deleteError
     );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setDeletingImageId(imageId);
-    setError("");
-    setSuccess("");
-
-    try {
-      await deleteProductImage(imageId);
-      await loadImages();
-
-      setSuccess(
-        "Imaginea a fost ștearsă."
-      );
-    } catch (deleteError) {
-      setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Imaginea nu a putut fi ștearsă."
-      );
-    } finally {
-      setDeletingImageId(null);
-    }
+  } finally {
+    setDeletingImageId(null);
   }
+}
 
   const remainingSlots =
     MAX_IMAGES - images.length;
 
-  return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Imagini produs
-          </h2>
+  const counterText = formatMessage(
+    t.counter,
+    {
+      current: images.length,
+      max: MAX_IMAGES,
+    }
+  );
 
-          <p className="mt-1 text-sm text-slate-500">
-            Maximum 8 imagini, câte 5 MB
-            fiecare. Formate: JPEG, PNG sau
-            WebP.
-          </p>
+  const uploadLabel =
+    uploading
+      ? t.uploading
+      : files.length === 1
+        ? t.uploadOne
+        : files.length > 1
+          ? formatMessage(
+              t.uploadWithCount,
+              {
+                count: files.length,
+              }
+            )
+          : t.upload;
+
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <ImageIcon size={22} />
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">
+              {t.title}
+            </h2>
+
+            <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
+              {t.description}
+            </p>
+          </div>
         </div>
 
         <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-          {images.length}/{MAX_IMAGES}
+          {counterText}
         </span>
       </div>
 
       {loadingImages ? (
-        <p className="mb-5 text-sm text-slate-500">
-          Se încarcă imaginile...
-        </p>
+        <div className="mb-5 flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">
+          <Loader2
+            size={18}
+            className="animate-spin"
+          />
+          {t.loadingImages}
+        </div>
       ) : images.length === 0 ? (
         <div className="mb-5 rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-500">
-          Produsul nu are imagini încă.
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-slate-400">
+            <FileImage size={22} />
+          </div>
+
+          {t.emptyImages}
         </div>
       ) : (
         <div className="mb-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {images.map((image, index) => (
-            <div
-              key={image.id}
-              className="overflow-hidden rounded-2xl border border-slate-200"
-            >
-              <div className="relative">
-                <img
-                  src={image.image_url}
-                  alt={`Imaginea ${index + 1} a produsului`}
-                  className="h-36 w-full object-cover"
-                />
+          {images.map((image, index) => {
+            const isDeleting =
+              deletingImageId === image.id;
 
-                {index === 0 && (
-                  <span className="absolute left-2 top-2 rounded-full bg-black/80 px-3 py-1 text-xs font-bold text-white">
-                    Principală
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  void handleDelete(image.id)
-                }
-                disabled={
-                  deletingImageId !== null ||
-                  uploading
-                }
-                className="w-full bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+            return (
+              <div
+                key={image.id}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
               >
-                {deletingImageId === image.id
-                  ? "Se șterge..."
-                  : "Șterge"}
-              </button>
-            </div>
-          ))}
+                <div className="relative h-36 bg-slate-100">
+                  <Image
+                    src={image.image_url}
+                    alt={formatMessage(
+                      t.imageAlt,
+                      {
+                        index: index + 1,
+                      }
+                    )}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 220px"
+                    className="object-cover"
+                  />
+
+                  {index === 0 && (
+                    <span className="absolute left-2 top-2 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-bold text-white">
+                      {t.mainImage}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                 onClick={() =>
+                      setDeleteConfirmationImageId(image.id)
+                    }
+                  disabled={
+                    deletingImageId !== null ||
+                    uploading
+                  }
+                  className="inline-flex w-full items-center justify-center gap-2 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeleting ? (
+                    <Loader2
+                      size={16}
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
+
+                  {isDeleting
+                    ? t.deleting
+                    : t.delete}
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -306,7 +492,7 @@ export default function ProductImageManager({
               uploading ||
               deletingImageId !== null
             }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 disabled:bg-slate-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white disabled:bg-slate-100 disabled:text-slate-400"
           />
 
           {files.length > 0 && (
@@ -316,8 +502,18 @@ export default function ProductImageManager({
                   key={`${file.name}-${file.size}`}
                   className="flex items-center justify-between gap-3 rounded-xl bg-slate-100 px-3 py-2 text-sm"
                 >
-                  <span className="truncate">
-                    📷 {file.name}
+                  <span className="inline-flex min-w-0 items-center gap-2">
+                    <FileImage
+                      size={16}
+                      className="shrink-0 text-slate-500"
+                    />
+
+                    <span className="truncate">
+                      <span className="sr-only">
+                        {t.selectedFile}
+                      </span>
+                      {file.name}
+                    </span>
                   </span>
 
                   <span className="shrink-0 text-xs text-slate-500">
@@ -338,39 +534,48 @@ export default function ProductImageManager({
               deletingImageId !== null ||
               files.length === 0
             }
-            className="mt-3 w-full rounded-xl bg-black px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {uploading
-              ? "Se încarcă..."
-              : `Adaugă ${
-                  files.length > 0
-                    ? files.length
-                    : ""
-                } ${
-                  files.length === 1
-                    ? "imagine"
-                    : "imagini"
-                }`}
+            {uploading ? (
+              <Loader2
+                size={18}
+                className="animate-spin"
+              />
+            ) : (
+              <UploadCloud size={18} />
+            )}
+
+            {uploadLabel}
           </button>
         </>
       )}
 
       {remainingSlots === 0 && (
-        <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
-          Ai ajuns la limita de 8 imagini.
-          Șterge una pentru a putea adăuga
-          alta.
+        <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-800">
+          <AlertTriangle
+            size={18}
+            className="mt-0.5 shrink-0"
+          />
+          {t.limitReached}
         </div>
       )}
 
       {error && (
-        <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+        <div className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+          <AlertTriangle
+            size={18}
+            className="mt-0.5 shrink-0"
+          />
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+        <div className="mt-4 flex items-start gap-2 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium leading-6 text-green-700">
+          <CheckCircle2
+            size={18}
+            className="mt-0.5 shrink-0"
+          />
           {success}
         </div>
       )}

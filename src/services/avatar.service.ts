@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-const MAX_AVATAR_SIZE =
-  3 * 1024 * 1024;
+const MAX_AVATAR_SIZE = 3 * 1024 * 1024;
 
 const ALLOWED_AVATAR_TYPES = [
   "image/jpeg",
@@ -9,23 +8,13 @@ const ALLOWED_AVATAR_TYPES = [
   "image/webp",
 ];
 
-export async function uploadOwnAvatar(
-  file: File
-) {
-  if (
-    !ALLOWED_AVATAR_TYPES.includes(
-      file.type
-    )
-  ) {
-    throw new Error(
-      "Poza trebuie să fie JPEG, PNG sau WebP."
-    );
+export async function uploadOwnAvatar(file: File) {
+  if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+    throw new Error("avatar_invalid_type");
   }
 
   if (file.size > MAX_AVATAR_SIZE) {
-    throw new Error(
-      "Poza nu poate depăși 3 MB."
-    );
+    throw new Error("avatar_oversized");
   }
 
   const {
@@ -34,13 +23,10 @@ export async function uploadOwnAvatar(
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    throw new Error(
-      "Trebuie să fii autentificat."
-    );
+    throw new Error("avatar_auth_required");
   }
 
-  const storagePath =
-    `${user.id}/avatar`;
+  const storagePath = `${user.id}/avatar`;
 
   const { error: uploadError } =
     await supabase.storage
@@ -52,9 +38,7 @@ export async function uploadOwnAvatar(
       });
 
   if (uploadError) {
-    throw new Error(
-      uploadError.message
-    );
+    throw new Error(uploadError.message);
   }
 
   const { data: publicUrlData } =
@@ -62,20 +46,15 @@ export async function uploadOwnAvatar(
       .from("avatars")
       .getPublicUrl(storagePath);
 
-  /*
-   * Parametrul v evită afișarea pozei vechi
-   * din cache-ul browserului.
-   */
   const avatarUrl =
     `${publicUrlData.publicUrl}?v=${Date.now()}`;
 
-  const { data, error } =
-    await supabase.rpc(
-      "set_own_avatar",
-      {
-        p_avatar_url: avatarUrl,
-      }
-    );
+  const { data, error } = await supabase.rpc(
+    "set_own_avatar",
+    {
+      p_avatar_url: avatarUrl,
+    }
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -89,9 +68,7 @@ export async function uploadOwnAvatar(
 
 export async function deleteOwnAvatar() {
   const { data: storagePath, error } =
-    await supabase.rpc(
-      "remove_own_avatar"
-    );
+    await supabase.rpc("remove_own_avatar");
 
   if (error) {
     throw new Error(error.message);
@@ -101,13 +78,11 @@ export async function deleteOwnAvatar() {
     const { error: storageError } =
       await supabase.storage
         .from("avatars")
-        .remove([
-          storagePath as string,
-        ]);
+        .remove([storagePath as string]);
 
     if (storageError) {
       console.warn(
-        "Avatarul a fost eliminat din profil, dar fișierul nu a putut fi șters:",
+        "Avatar profile record removed but storage file deletion failed:",
         storageError.message
       );
     }

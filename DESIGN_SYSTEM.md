@@ -1,4 +1,4 @@
-# Vendora Design System
+# Auctino Design System
 
 ## Philosophy
 

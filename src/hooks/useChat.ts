@@ -1,13 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { supabase } from "@/lib/supabase";
 import { Conversation, Message } from "@/types/chat";
 import {
   getMessages,
-  sendMessage,
   markMessagesAsRead,
+  sendMessage,
 } from "@/services/chat.service";
+import { useMessages } from "@/i18n/useMessages";
+
+type UseChatProps = {
+  conversationId: string;
+  productId: string;
+  sellerId: string;
+  buyerId: string;
+  currentUserId: string;
+};
 
 export function useChat({
   conversationId,
@@ -15,22 +30,44 @@ export function useChat({
   sellerId,
   buyerId,
   currentUserId,
-}: {
-  conversationId: string;
-  productId: string;
-  sellerId: string;
-  buyerId: string;
-  currentUserId: string;
-}) {
-  const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
+}: UseChatProps) {
+  const appMessages = useMessages();
 
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [
+    conversation,
+    setConversation,
+  ] = useState<Conversation | null>(null);
 
-  const loadChat = async () => {
+  const [messages, setMessages] =
+    useState<Message[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [isTyping, setIsTyping] =
+    useState(false);
+
+  const typingTimeoutRef =
+    useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
+
+  const channelRef =
+    useRef<ReturnType<typeof supabase.channel> | null>(
+      null
+    );
+
+  const loadChat = useCallback(async () => {
+    if (!conversationId || !currentUserId) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError("");
 
     try {
       const activeConversation: Conversation = {
@@ -43,43 +80,60 @@ export function useChat({
 
       setConversation(activeConversation);
 
-      const { data: messagesData, error: messagesError } = await getMessages(
-        conversationId
-      );
+      const {
+        data: messagesData,
+        error: messagesError,
+      } = await getMessages(conversationId);
 
       if (messagesError) {
-        console.error("Eroare getMessages:", messagesError.message);
+        console.error(
+          appMessages.chat.loadMessagesError,
+          messagesError.message
+        );
+
+        setError(
+          appMessages.chat.loadMessagesError
+        );
         return;
       }
 
-      setMessages(messagesData || []);
+      setMessages(
+        (messagesData ?? []) as Message[]
+      );
 
-      if (currentUserId) {
-        const { error: readError } = await markMessagesAsRead(
+      const { error: readError } =
+        await markMessagesAsRead(
           conversationId,
           currentUserId
         );
 
-        if (readError) {
-          console.error("Eroare markMessagesAsRead:", readError.message);
-        }
+      if (readError) {
+        console.error(
+          appMessages.chat.markReadError,
+          readError.message
+        );
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    conversationId,
+    productId,
+    sellerId,
+    buyerId,
+    currentUserId,
+    appMessages.chat.loadMessagesError,
+    appMessages.chat.markReadError,
+  ]);
+
+  useEffect(() => {
+    void loadChat();
+  }, [loadChat]);
 
   useEffect(() => {
     if (!conversationId || !currentUserId) {
-      setLoading(false);
       return;
     }
-
-    loadChat();
-  }, [conversationId, currentUserId]);
-
-  useEffect(() => {
-    if (!conversationId) return;
 
     const channel = supabase
       .channel(`chat-${conversationId}`)
@@ -92,94 +146,213 @@ export function useChat({
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          const newMessage = payload.new as Message;
+          const newMessage =
+            payload.new as Message;
 
-          setMessages((prev) => {
-            const alreadyExists = prev.some(
-              (message) => message.id === newMessage.id
-            );
+          setMessages((currentMessages) => {
+            const alreadyExists =
+              currentMessages.some(
+                (message) =>
+                  message.id === newMessage.id
+              );
 
-            if (alreadyExists) return prev;
+            if (alreadyExists) {
+              return currentMessages;
+            }
 
-            return [...prev, newMessage];
+            return [
+              ...currentMessages,
+              newMessage,
+            ];
           });
 
-          if (currentUserId && newMessage.sender_id !== currentUserId) {
-            await markMessagesAsRead(conversationId, currentUserId);
+          if (
+            newMessage.sender_id !== currentUserId
+          ) {
+            const { error: readError } =
+              await markMessagesAsRead(
+                conversationId,
+                currentUserId
+              );
+
+            if (readError) {
+              console.error(
+                appMessages.chat.markReadError,
+                readError.message
+              );
+            }
           }
         }
       )
-      .on("broadcast", { event: "typing" }, (payload) => {
-        const typingUserId = payload.payload?.userId;
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const updatedMessage =
+            payload.new as Message;
 
-        if (!typingUserId || typingUserId === currentUserId) return;
-
-        setIsTyping(true);
-
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
+          setMessages((currentMessages) =>
+            currentMessages.map((message) =>
+              message.id === updatedMessage.id
+                ? {
+                    ...message,
+                    ...updatedMessage,
+                  }
+                : message
+            )
+          );
         }
+      )
+      .on(
+        "broadcast",
+        {
+          event: "typing",
+        },
+        (payload: {
+          payload?: {
+            userId?: string;
+          };
+        }) => {
+          const typingUserId =
+            payload.payload?.userId;
 
-        typingTimeoutRef.current = setTimeout(() => {
-          setIsTyping(false);
-        }, 2000);
-      })
+          if (
+            !typingUserId ||
+            typingUserId === currentUserId
+          ) {
+            return;
+          }
+
+          setIsTyping(true);
+
+          if (typingTimeoutRef.current) {
+            clearTimeout(
+              typingTimeoutRef.current
+            );
+          }
+
+          typingTimeoutRef.current =
+            setTimeout(() => {
+              setIsTyping(false);
+            }, 2000);
+        }
+      )
       .subscribe();
+
+    channelRef.current = channel;
 
     return () => {
       if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+        clearTimeout(
+          typingTimeoutRef.current
+        );
       }
 
-      supabase.removeChannel(channel);
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
     };
-  }, [conversationId, currentUserId]);
+  }, [
+    conversationId,
+    currentUserId,
+    appMessages.chat.markReadError,
+  ]);
 
-  const sendTypingEvent = async () => {
-    if (!conversationId || !currentUserId) return;
+  async function sendTypingEvent() {
+    if (
+      !conversationId ||
+      !currentUserId ||
+      !channelRef.current
+    ) {
+      return;
+    }
 
-    await supabase.channel(`chat-${conversationId}`).send({
+    await channelRef.current.send({
       type: "broadcast",
       event: "typing",
       payload: {
         userId: currentUserId,
       },
     });
-  };
+  }
 
-  const sendChatMessage = async (senderId: string, content: string) => {
+  async function sendChatMessage(
+    senderId: string,
+    content: string
+  ) {
     if (!conversationId) {
-      console.error("Nu există conversationId.");
-      return;
+      setError(
+        appMessages.chat.missingConversationError
+      );
+      return false;
     }
 
-    const receiverId = senderId === sellerId ? buyerId : sellerId;
+    setError("");
 
-    const { error } = await sendMessage({
-      conversationId,
-      senderId,
-      receiverId,
-      productId,
-      content,
-    });
+    const receiverId =
+      senderId === sellerId
+        ? buyerId
+        : sellerId;
 
-    if (error) {
-      console.error("Eroare sendMessage:", error.message);
-      alert(`Eroare la trimiterea mesajului: ${error.message}`);
-      return;
+    const { error: sendError } =
+      await sendMessage({
+        conversationId,
+        senderId,
+        receiverId,
+        productId,
+        content,
+      });
+
+    if (sendError) {
+      console.error(
+        appMessages.chat.sendMessageError,
+        sendError.message
+      );
+
+      setError(
+        `${appMessages.chat.sendMessageError} ${sendError.message}`
+      );
+
+      return false;
     }
 
     setIsTyping(false);
 
-    const { data: messagesData } = await getMessages(conversationId);
-    setMessages(messagesData || []);
-  };
+    const {
+      data: refreshedMessages,
+      error: refreshError,
+    } = await getMessages(conversationId);
+
+    if (refreshError) {
+      console.error(
+        appMessages.chat.loadMessagesError,
+        refreshError.message
+      );
+    } else {
+      setMessages(
+        (refreshedMessages ?? []) as Message[]
+      );
+    }
+
+    return true;
+  }
+
+  function clearError() {
+    setError("");
+  }
 
   return {
     conversation,
     messages,
     loading,
+    error,
     isTyping,
+    clearError,
+    loadChat,
     sendTypingEvent,
     sendChatMessage,
   };

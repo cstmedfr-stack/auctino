@@ -1,73 +1,162 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { supabase } from "@/lib/supabase";
 import {
-  getUserFavorites,
   addFavorite,
+  getUserFavorites,
   removeFavorite,
 } from "@/services/favorite.service";
+import { useMessages } from "@/i18n/useMessages";
 
 export function useFavorites() {
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [loadingFavorites, setLoadingFavorites] = useState(true);
+  const messages = useMessages();
+  const t = messages.favoritesPage;
 
-  const fetchFavorites = async () => {
-    setLoadingFavorites(true);
+  const [favoriteIds, setFavoriteIds] =
+    useState<string[]>([]);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const [
+    loadingFavorites,
+    setLoadingFavorites,
+  ] = useState(true);
 
-    if (!user) {
-      setFavoriteIds([]);
+  const [error, setError] =
+    useState("");
+
+  const fetchFavorites = useCallback(
+    async () => {
+      setLoadingFavorites(true);
+      setError("");
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setFavoriteIds([]);
+        setLoadingFavorites(false);
+        return;
+      }
+
+      const {
+        data,
+        error: favoritesError,
+      } = await getUserFavorites(user.id);
+
+      if (favoritesError) {
+        console.error(
+          t.loadError,
+          favoritesError.message
+        );
+
+        setError(t.loadError);
+        setLoadingFavorites(false);
+        return;
+      }
+
+      setFavoriteIds(
+        (data ?? []).map(
+          (favorite) => favorite.product_id
+        )
+      );
+
       setLoadingFavorites(false);
-      return;
-    }
+    },
+    [t.loadError]
+  );
 
-    const { data, error } = await getUserFavorites(user.id);
+  const toggleFavorite = useCallback(
+    async (productId: string) => {
+      setError("");
 
-    if (!error && data) {
-      setFavoriteIds(data.map((favorite) => favorite.product_id));
-    }
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    setLoadingFavorites(false);
-  };
-
-  const toggleFavorite = async (productId: string) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      alert("Trebuie să fii logat ca să salvezi produsul la favorite.");
-      return;
-    }
-
-    const isAlreadyFavorite = favoriteIds.includes(productId);
-
-    if (isAlreadyFavorite) {
-      const { error } = await removeFavorite(user.id, productId);
-
-      if (!error) {
-        setFavoriteIds((prev) => prev.filter((id) => id !== productId));
+      if (userError || !user) {
+        setError(t.authRequiredToggle);
+        return false;
       }
-    } else {
-      const { error } = await addFavorite(user.id, productId);
 
-      if (!error) {
-        setFavoriteIds((prev) => [...prev, productId]);
+      const isAlreadyFavorite =
+        favoriteIds.includes(productId);
+
+      if (isAlreadyFavorite) {
+        const { error: removeError } =
+          await removeFavorite(
+            user.id,
+            productId
+          );
+
+        if (removeError) {
+          console.error(
+            t.removeError,
+            removeError.message
+          );
+
+          setError(t.removeError);
+          return false;
+        }
+
+        setFavoriteIds((previousIds) =>
+          previousIds.filter(
+            (id) => id !== productId
+          )
+        );
+
+        return true;
       }
-    }
-  };
+
+      const { error: addError } =
+        await addFavorite(
+          user.id,
+          productId
+        );
+
+      if (addError) {
+        console.error(
+          t.addError,
+          addError.message
+        );
+
+        setError(t.addError);
+        return false;
+      }
+
+      setFavoriteIds((previousIds) => {
+        if (previousIds.includes(productId)) {
+          return previousIds;
+        }
+
+        return [...previousIds, productId];
+      });
+
+      return true;
+    },
+    [
+      favoriteIds,
+      t.addError,
+      t.authRequiredToggle,
+      t.removeError,
+    ]
+  );
 
   useEffect(() => {
-    fetchFavorites();
-  }, []);
+    void fetchFavorites();
+  }, [fetchFavorites]);
 
   return {
     favoriteIds,
     loadingFavorites,
+    error,
     toggleFavorite,
     refreshFavorites: fetchFavorites,
   };

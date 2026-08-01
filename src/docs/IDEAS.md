@@ -1,4 +1,4 @@
-# Vendora Ideas
+# Auctino Ideas
 
 ## Trust & reputație
 

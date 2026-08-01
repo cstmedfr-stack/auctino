@@ -1,8 +1,8 @@
-# 🎨 Vendora - Brand Guidelines
+# 🎨 Auctino - Brand Guidelines
 
 ## Vision
 
-Vendora este o platformă modernă de licitații C2C dedicată obiectelor second-hand, construită pentru a inspira încredere, simplitate și eleganță.
+Auctino este o platformă modernă de licitații C2C dedicată obiectelor second-hand, construită pentru a inspira încredere, simplitate și eleganță.
 
 Obiectivul este să oferim o experiență premium, diferită de marketplace-urile clasice.
 

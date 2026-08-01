@@ -1,9 +1,21 @@
+"use client";
+
+import AuthLoadingState from "@/components/forms/AuthLoadingState";
+import AuthPageShell from "@/components/forms/AuthPageShell";
 import { RegisterForm } from "@/components/forms/RegisterForm";
+import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 
 export default function RegisterPage() {
+  const { checkingAuth } =
+    useRedirectIfAuthenticated();
+
   return (
-    <main className="flex min-h-[80vh] items-center justify-center bg-[#FAFAF8] px-6 py-16">
-      <RegisterForm />
-    </main>
+    <AuthPageShell>
+      {checkingAuth ? (
+        <AuthLoadingState />
+      ) : (
+        <RegisterForm />
+      )}
+    </AuthPageShell>
   );
 }

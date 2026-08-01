@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 import { ProductImage } from "@/types/productImage";
+import { useMessages } from "@/i18n/useMessages";
 
 type ProductGalleryProps = {
   images: ProductImage[];
@@ -12,51 +19,91 @@ export default function ProductGallery({
   images,
   title,
 }: ProductGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState("");
+  const messages = useMessages();
+  const t = messages.productPage;
+
+  const validImages = useMemo(
+    () =>
+      images.filter(
+        (image) => Boolean(image.image_url)
+      ),
+    [images]
+  );
+
+  const [selectedImage, setSelectedImage] =
+    useState("");
 
   useEffect(() => {
-    if (images.length > 0) {
-      setSelectedImage(images[0].image_url);
+    if (validImages.length > 0) {
+      setSelectedImage(
+        validImages[0].image_url
+      );
+      return;
     }
-  }, [images]);
-console.log("Gallery images:", images);
-console.log("Selected:", selectedImage);
+
+    setSelectedImage("");
+  }, [validImages]);
 
   return (
     <section className="space-y-4">
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
-        <div className="flex h-[500px] items-center justify-center bg-gray-100">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="relative flex h-[420px] items-center justify-center bg-slate-100 sm:h-[520px]">
           {selectedImage ? (
-            <img
+           <Image
               src={selectedImage}
               alt={title}
-              className="h-full w-full object-cover"
+              fill
+              priority
+              loading="eager"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
             />
           ) : (
-            <span className="text-gray-400">Fără imagine</span>
+            <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white">
+                <ImageIcon size={26} />
+              </div>
+
+              <span className="text-sm font-semibold">
+                {t.noImage}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
-      {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto">
-          {images.map((image) => (
-            <button
-              key={image.id}
-              onClick={() => setSelectedImage(image.image_url)}
-              className={`overflow-hidden rounded-2xl border-2 transition ${
-                selectedImage === image.image_url
-                  ? "border-orange-500"
-                  : "border-transparent"
-              }`}
-            >
-              <img
-                src={image.image_url}
-                alt={title}
-                className="h-24 w-24 object-cover"
-              />
-            </button>
-          ))}
+      {validImages.length > 1 && (
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {validImages.map((image, index) => {
+            const isSelected =
+              selectedImage === image.image_url;
+
+            return (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() =>
+                  setSelectedImage(
+                    image.image_url
+                  )
+                }
+                aria-label={`${t.imageThumbnail} ${index + 1}`}
+                className={`relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-2 bg-slate-100 transition ${
+                  isSelected
+                    ? "border-indigo-600"
+                    : "border-transparent hover:border-slate-300"
+                }`}
+              >
+                <Image
+                  src={image.image_url}
+                  alt={`${title} ${index + 1}`}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              </button>
+            );
+          })}
         </div>
       )}
     </section>

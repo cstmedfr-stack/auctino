@@ -1,8 +1,15 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
+import { useMessages } from "@/i18n/useMessages";
 
 type AdminGuardProps = {
   children: ReactNode;
@@ -12,9 +19,13 @@ export default function AdminGuard({
   children,
 }: AdminGuardProps) {
   const router = useRouter();
+  const messages = useMessages();
 
-  const [checkingRole, setCheckingRole] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingRole, setCheckingRole] =
+    useState(true);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,18 +47,21 @@ export default function AdminGuard({
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("role, account_status")
-          .eq("id", user.id)
-          .maybeSingle();
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("role, account_status")
+        .eq("id", user.id)
+        .maybeSingle();
 
       if (cancelled) return;
 
       if (profileError) {
-        console.error(
-          "Eroare la verificarea rolului de administrator:",
+        console.warn(
+          messages.guards
+            .adminRoleConsoleError,
           profileError.message
         );
 
@@ -57,10 +71,15 @@ export default function AdminGuard({
         return;
       }
 
-      if (profile?.account_status === "suspended") {
+      if (
+        profile?.account_status ===
+        "suspended"
+      ) {
         setIsAdmin(false);
         setCheckingRole(false);
-        router.replace("/account-suspended");
+        router.replace(
+          "/account-suspended"
+        );
         return;
       }
 
@@ -91,16 +110,24 @@ export default function AdminGuard({
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, messages.guards]);
 
   if (checkingRole) {
     return (
       <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6">
         <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+            <Loader2
+              size={26}
+              className="animate-spin"
+            />
+          </div>
 
           <p className="font-semibold text-slate-700">
-            Se verifică accesul de administrator...
+            {
+              messages.guards
+                .checkingAdminAccess
+            }
           </p>
         </div>
       </main>

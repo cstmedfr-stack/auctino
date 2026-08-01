@@ -13,13 +13,13 @@ const ALLOWED_IMAGE_TYPES: Record<string, string> = {
 function validateImageFile(file: File) {
   if (!ALLOWED_IMAGE_TYPES[file.type]) {
     throw new Error(
-      `"${file.name}" nu este într-un format acceptat. Folosește JPEG, PNG sau WebP.`
+      `product_image_invalid_type|${file.name}`
     );
   }
 
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(
-      `"${file.name}" depășește limita de 5 MB.`
+      `product_image_oversized|${file.name}`
     );
   }
 }
@@ -34,17 +34,17 @@ async function verifyImageManagementAccess(
 
   if (userError || !user) {
     throw new Error(
-      "Trebuie să fii autentificat pentru a modifica imaginile."
+      "product_image_auth_required"
     );
   }
 
   const { data: canManage, error } =
-  await supabase.rpc(
-    "can_manage_own_product_images",
-    {
-      p_product_id_text: productId,
-    }
-  );
+    await supabase.rpc(
+      "can_manage_own_product_images",
+      {
+        p_product_id_text: productId,
+      }
+    );
 
   if (error) {
     throw error;
@@ -52,7 +52,7 @@ async function verifyImageManagementAccess(
 
   if (!canManage) {
     throw new Error(
-      "Imaginile nu mai pot fi modificate. Produsul poate avea oferte, poate fi încheiat sau poate avea un status blocat."
+      "product_image_cannot_modify"
     );
   }
 
@@ -89,7 +89,7 @@ export async function uploadProductImages(
 
   if (user.id !== userId) {
     throw new Error(
-      "Nu poți încărca imagini pentru produsul altui utilizator."
+      "product_image_not_owner"
     );
   }
 
@@ -118,8 +118,8 @@ export async function uploadProductImages(
 
     throw new Error(
       availableSlots > 0
-        ? `Mai poți adăuga maximum ${availableSlots} imagini.`
-        : "Produsul are deja numărul maxim de 8 imagini."
+        ? `product_image_remaining_slots|${availableSlots}`
+        : "product_image_max_reached"
     );
   }
 
@@ -163,16 +163,16 @@ export async function uploadProductImages(
         publicUrlData.publicUrl;
 
       const {
-  data: imageId,
-  error: registerError,
-} = await supabase.rpc(
-  "register_own_product_image",
-  {
-    p_product_id: productId,
-    p_storage_path: storagePath,
-    p_image_url: imageUrl,
-  }
-);
+        data: imageId,
+        error: registerError,
+      } = await supabase.rpc(
+        "register_own_product_image",
+        {
+          p_product_id: productId,
+          p_storage_path: storagePath,
+          p_image_url: imageUrl,
+        }
+      );
 
       if (registerError || !imageId) {
         await supabase.storage
@@ -182,7 +182,7 @@ export async function uploadProductImages(
         throw (
           registerError ??
           new Error(
-            "Imaginea nu a putut fi înregistrată."
+            "product_image_register_failed"
           )
         );
       }
@@ -212,7 +212,7 @@ export async function uploadProductImages(
         );
       } catch (rollbackError) {
         console.error(
-          "Imaginea încărcată parțial nu a putut fi anulată:",
+          "Partial product image upload rollback failed:",
           rollbackError
         );
       }
@@ -226,12 +226,12 @@ export async function deleteProductImage(
   imageId: string
 ) {
   const { data: storagePath, error } =
-  await supabase.rpc(
-    "delete_own_product_image_secure",
-    {
-      p_image_id: imageId,
-    }
-  );
+    await supabase.rpc(
+      "delete_own_product_image_secure",
+      {
+        p_image_id: imageId,
+      }
+    );
 
   if (error) {
     throw error;
@@ -245,7 +245,7 @@ export async function deleteProductImage(
 
     if (storageError) {
       console.warn(
-        "Înregistrarea imaginii a fost ștearsă, dar fișierul din Storage nu a putut fi eliminat:",
+        "Product image record deleted but storage file removal failed:",
         storageError.message
       );
     }

@@ -1,26 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { getPublicProfile } from "@/services/publicProfile.service";
 import { Profile } from "@/types/profile";
 
-export function usePublicProfile(userId: string) {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+export function usePublicProfile(
+  userId: string
+) {
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     if (!userId) {
+      setProfile(null);
+      setError("");
       setLoading(false);
       return;
     }
 
     const loadProfile = async () => {
       setLoading(true);
+      setError("");
 
-      const { data, error } = await getPublicProfile(userId);
+      const {
+        data,
+        error: profileError,
+      } = await getPublicProfile(userId);
 
-      if (error) {
-        console.error(error.message);
+      if (!isMounted) {
+        return;
+      }
+
+      if (profileError) {
+        console.error(
+          profileError.message
+        );
+
+        setProfile(null);
+        setError(
+          profileError.message
+        );
       } else {
         setProfile(data);
       }
@@ -28,11 +58,16 @@ export function usePublicProfile(userId: string) {
       setLoading(false);
     };
 
-    loadProfile();
+    void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   return {
     profile,
     loading,
+    error,
   };
 }

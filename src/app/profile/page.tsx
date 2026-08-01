@@ -1,117 +1,93 @@
 "use client";
 
+import AccountNavigation from "@/components/profile/AccountNavigation";
 import Link from "next/link";
-import UserProfileHeader from "@/components/profile/UserProfileHeader";
-import VerificationCard from "@/components/profile/VerificationCard";
-import StatisticsCard from "@/components/profile/StatisticsCard";
+import AccountPageState from "@/components/profile/AccountPageState";
+import PrivateProfileOverview from "@/components/profile/PrivateProfileOverview";
 import { useProfile } from "@/hooks/useProfile";
-import TrustScoreCard from "@/components/profile/TrustScoreCard";
+import { useMessages } from "@/i18n/useMessages";
 import { calculateTrustScore } from "@/utils/trustScore";
-import ProfileHeader from "@/components/profile/ProfileHeader";
 
 export default function ProfilePage() {
-  const { profile, loading } = useProfile();
-  const trustScore = profile? calculateTrustScore(profile) : null;
+  const messages = useMessages();
+  const t = messages.accountProfile.overview;
 
-  if (loading) {
- 
-    return (
-      <main className="min-h-screen bg-slate-50 p-8">
-        <p>Se încarcă profilul...</p>
-      </main>
-    );
-  }
+  const {
+  profile,
+  loading,
+  error,
+  refreshProfile,
+} = useProfile();
 
-  if (!profile) {
-    return (
-      <main className="min-h-screen bg-slate-50 p-8">
-        <p>Profilul nu a fost găsit.</p>
-      </main>
-    );
-  }
+  const trustScore = profile
+    ? calculateTrustScore(
+        profile,
+        messages.publicProfile.trustScoreLabels
+      )
+    : null;
 
-  console.log({
-  ProfileHeader,
-  VerificationCard,
-  StatisticsCard,
-  TrustScoreCard,
-});
   return (
-    <main className="min-h-screen bg-slate-50 p-8">
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900">
-            Contul meu
-          </h1>
-          <p className="mt-2 text-slate-500">
-            Profil, încredere, licitații și setări Vendora.
-          </p>
-        </div>
+   <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+  <p className="text-sm font-bold uppercase tracking-wide text-indigo-600">
+    {t.eyebrow}
+  </p>
 
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="rounded-3xl bg-white p-5 shadow-sm">
-            <nav className="space-y-2">
-              <Link href="/profile" className="block rounded-2xl bg-black px-4 py-3 font-semibold text-white">
-                👤 Profil
-              </Link>
+  <div className="mt-3 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+    <div>
+      <h1 className="text-3xl font-black text-slate-950 md:text-4xl">
+        {t.title}
+      </h1>
 
-              <Link href="/my-products" className="block rounded-2xl px-4 py-3 font-semibold text-slate-700 hover:bg-slate-100">
-                📦 Produsele mele
-              </Link>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+        {t.description}
+      </p>
+    </div>
 
-              <Link href="/chat" className="block rounded-2xl px-4 py-3 font-semibold text-slate-700 hover:bg-slate-100">
-                💬 Mesaje
-              </Link>
+    <div className="flex flex-wrap gap-3">
+      <Link
+        href="/account/profile"
+        className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+      >
+        {t.editProfile}
+      </Link>
 
-              <Link href="/favorites" className="block rounded-2xl px-4 py-3 font-semibold text-slate-700 hover:bg-slate-100">
-                ❤️ Favorite
-              </Link>
+      {profile && (
+        <Link
+          href={`/users/${profile.id}`}
+          className="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+        >
+          {t.publicProfile}
+        </Link>
+      )}
+    </div>
+  </div>
+</section>
 
-              <Link href="/dashboard" className="block rounded-2xl px-4 py-3 font-semibold text-slate-700 hover:bg-slate-100">
-                🏷 Licitații
-              </Link>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr]">
+          <AccountNavigation active="overview" />
 
-              <button className="w-full rounded-2xl px-4 py-3 text-left font-semibold text-slate-700 hover:bg-slate-100">
-                ⚙ Setări
-              </button>
-
-              <button className="w-full rounded-2xl px-4 py-3 text-left font-semibold text-slate-700 hover:bg-slate-100">
-                🔐 Securitate
-              </button>
-            </nav>
-          </aside>
-
-          <section className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-1">
-              <UserProfileHeader
-                fullName={profile.full_name}
-                avatarUrl={profile.avatar_url}
+          <div>
+            {loading ? (
+              <AccountPageState type="loading" />
+            ) : error ? (
+              <AccountPageState
+                type="error"
+                message={error}
+                onRetry={() => {
+                 void refreshProfile();
+                }}
               />
-            </div>
-
-            <div className="space-y-6 lg:col-span-2">
-
-                {trustScore && (
-                <TrustScoreCard
-                score={trustScore.score}
-                level={trustScore.level}
-                breakdown={trustScore.breakdown}
-                />
+            ) : !profile ? (
+              <AccountPageState type="notFound" />
+            ) : (
+              <PrivateProfileOverview
+                profile={profile}
+                trustScore={trustScore}
+              />
             )}
-
-                <VerificationCard
-                phoneVerified={profile.phone_verified}
-                identityVerified={profile.identity_verified}
-              />
-
-              <StatisticsCard
-                activeProducts={0}
-                soldProducts={profile.sold_count}
-                wonAuctions={profile.won_auctions}
-                rating={profile.rating ?? 0}
-              />
-            </div>
-          </section>
+          </div>
         </div>
       </div>
     </main>

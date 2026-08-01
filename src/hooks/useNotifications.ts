@@ -8,58 +8,81 @@ import {
 } from "react";
 
 import { supabase } from "@/lib/supabase";
-
 import {
   getUserNotifications,
-  markNotificationAsRead,
   markAllNotificationsAsRead,
+  markNotificationAsRead,
 } from "@/services/notification.service";
-
 import { Notification } from "@/types/notification";
+import { useMessages } from "@/i18n/useMessages";
+
+type LoadNotificationsOptions = {
+  silent?: boolean;
+};
 
 export function useNotifications() {
+  const messages = useMessages();
+  const t = messages.notificationsPage;
+
   const [notifications, setNotifications] =
     useState<Notification[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   const channelInstanceId = useRef(
     Math.random().toString(36).slice(2)
   );
 
-  const loadNotifications = useCallback(async () => {
-    setLoading(true);
+  const loadNotifications = useCallback(
+    async (
+      options?: LoadNotificationsOptions
+    ) => {
+      if (!options?.silent) {
+        setLoading(true);
+      }
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      setError("");
 
-    if (userError || !user) {
-      setNotifications([]);
-      setLoading(false);
-      return;
-    }
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    const { data, error } =
-      await getUserNotifications(user.id);
+      if (userError || !user) {
+        setNotifications([]);
+        setError(t.authRequired);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      console.error(
-        "Eroare la încărcarea notificărilor:",
-        error
+      const {
+        data,
+        error: notificationsError,
+      } = await getUserNotifications(user.id);
+
+      if (notificationsError) {
+        console.error(
+          t.loadError,
+          notificationsError.message
+        );
+
+        setError(t.loadError);
+        setLoading(false);
+        return;
+      }
+
+      setNotifications(
+        (data ?? []) as Notification[]
       );
 
       setLoading(false);
-      return;
-    }
-
-    setNotifications(
-      (data ?? []) as Notification[]
-    );
-
-    setLoading(false);
-  }, []);
+    },
+    [t.authRequired, t.loadError]
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -75,17 +98,19 @@ export function useNotifications() {
     async function refreshNotifications(
       userId: string
     ) {
-      const { data, error } =
-        await getUserNotifications(userId);
+      const {
+        data,
+        error: refreshError,
+      } = await getUserNotifications(userId);
 
       if (!isActive) {
         return;
       }
 
-      if (error) {
+      if (refreshError) {
         console.error(
-          "Eroare la actualizarea notificărilor:",
-          error
+          t.updateError,
+          refreshError.message
         );
 
         return;
@@ -215,7 +240,7 @@ export function useNotifications() {
         ) {
           if (retryCount >= 3) {
             console.warn(
-              "Realtime pentru notificări nu este disponibil momentan. Se folosește actualizarea periodică."
+              t.realtimeUnavailable
             );
 
             return;
@@ -240,6 +265,9 @@ export function useNotifications() {
     }
 
     async function initializeNotifications() {
+      setLoading(true);
+      setError("");
+
       const {
         data: { user },
         error: userError,
@@ -251,6 +279,7 @@ export function useNotifications() {
 
       if (userError || !user) {
         setNotifications([]);
+        setError(t.authRequired);
         setLoading(false);
         return;
       }
@@ -291,27 +320,33 @@ export function useNotifications() {
         channel = null;
       }
     };
-  }, []);
+  }, [
+    t.authRequired,
+    t.realtimeUnavailable,
+    t.updateError,
+  ]);
 
   const unreadCount = notifications.filter(
-    (notification) =>
-      !notification.is_read
+    (notification) => !notification.is_read
   ).length;
 
   const markAsRead = async (
     notificationId: string
   ) => {
-    const { error } =
+    setError("");
+
+    const { error: markError } =
       await markNotificationAsRead(
         notificationId
       );
 
-    if (error) {
+    if (markError) {
       console.error(
-        "Eroare la marcarea notificării:",
-        error
+        t.markReadError,
+        markError.message
       );
 
+      setError(t.markReadError);
       return;
     }
 
@@ -330,25 +365,29 @@ export function useNotifications() {
   };
 
   const markAllAsRead = async () => {
+    setError("");
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
+      setError(t.authRequired);
       return;
     }
 
-    const { error } =
+    const { error: markAllError } =
       await markAllNotificationsAsRead(
         user.id
       );
 
-    if (error) {
+    if (markAllError) {
       console.error(
-        "Eroare la marcarea tuturor notificărilor:",
-        error
+        t.markAllReadError,
+        markAllError.message
       );
 
+      setError(t.markAllReadError);
       return;
     }
 
@@ -366,6 +405,7 @@ export function useNotifications() {
   return {
     notifications,
     loading,
+    error,
     unreadCount,
     loadNotifications,
     markAsRead,

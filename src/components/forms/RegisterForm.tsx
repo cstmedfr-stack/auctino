@@ -1,107 +1,186 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  UserPlus,
+} from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
-
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { useMessages } from "@/i18n/useMessages";
+import { validateRegisterForm } from "@/utils/authValidation";
 
 export function RegisterForm() {
   const router = useRouter();
+  const messages = useMessages();
+  const t = messages.auth.register;
+  const validationMessages = messages.auth.validation;
+  const [fullName, setFullName] =    useState("");
+  const [email, setEmail] =    useState("");
+  const [password, setPassword] =    useState("");
+  const [loading, setLoading] =    useState(false);
+  const [error, setError] =    useState("");
+  const [success, setSuccess] =    useState("");
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleRegister(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
 
     setError("");
     setSuccess("");
     setLoading(true);
+    const validationError = validateRegisterForm(
+  fullName,
+  email,
+  password,
+  validationMessages
+);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+if (validationError) {
+  setError(validationError);
+  setLoading(false);
+  return;
+}
+
+    const { error: registerError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
+      });
 
     setLoading(false);
 
-    if (error) {
-      setError(error.message);
+    if (registerError) {
+      setError(t.genericError);
       return;
     }
 
-    setSuccess("Cont creat cu succes! Verifică emailul pentru confirmare.");
+    setSuccess(t.success);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       router.push("/login");
     }, 2500);
   }
 
   return (
-    <Card className="w-full max-w-md p-8">
-      <h1 className="mb-2 text-3xl font-extrabold text-slate-900">
-        Creează un cont
-      </h1>
+    <Card className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="mb-8">
+        <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-indigo-600">
+          <UserPlus size={17} />
+          {t.eyebrow}
+        </p>
 
-      <p className="mb-8 text-slate-500">
-        Începe să vinzi și să licitezi pe Vendora.
-      </p>
+        <h1 className="mt-2 text-3xl font-black text-slate-950">
+          {t.title}
+        </h1>
 
-      <form onSubmit={handleRegister} className="space-y-5">
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          {t.description}
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleRegister}
+        className="space-y-5"
+      >
         <Input
           id="name"
-          label="Nume complet"
-          placeholder="Nume și prenume"
+          label={t.fullNameLabel}
+          placeholder={t.fullNamePlaceholder}
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          onChange={(event) =>
+            setFullName(event.target.value)
+          }
           required
         />
 
         <Input
           id="email"
           type="email"
-          label="Email"
-          placeholder="nume@email.com"
+          label={t.emailLabel}
+          placeholder={t.emailPlaceholder}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) =>
+            setEmail(event.target.value)
+          }
           required
         />
 
         <Input
           id="password"
           type="password"
-          label="Parolă"
-          placeholder="Minimum 6 caractere"
+          label={t.passwordLabel}
+          placeholder={t.passwordPlaceholder}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) =>
+            setPassword(event.target.value)
+          }
           required
           minLength={6}
         />
 
-        {error && <p className="text-sm font-medium text-red-500">{error}</p>}
-
-        {success && (
-          <p className="text-sm font-medium text-green-600">{success}</p>
+        {error && (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            <AlertTriangle
+              size={18}
+              className="mt-0.5 shrink-0"
+            />
+            {error}
+          </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Se creează contul..." : "Creează cont"}
+        {success && (
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+            <CheckCircle2
+              size={18}
+              className="mt-0.5 shrink-0"
+            />
+            {success}
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loading || Boolean(success)}
+        >
+          {loading ? (
+            <span className="inline-flex items-center justify-center gap-2">
+              <Loader2
+                size={17}
+                className="animate-spin"
+              />
+              {t.submitting}
+            </span>
+          ) : (
+            t.submit
+          )}
         </Button>
       </form>
+
+      <p className="mt-6 text-center text-sm text-slate-600">
+        {t.alreadyHaveAccount}{" "}
+        <Link
+          href="/login"
+          className="font-bold text-indigo-700 hover:text-indigo-900"
+        >
+          {t.loginLink}
+        </Link>
+      </p>
     </Card>
   );
 }

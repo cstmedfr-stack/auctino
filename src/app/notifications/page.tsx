@@ -1,17 +1,27 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useNotifications } from "@/hooks/useNotifications";
-import NotificationItem from "@/components/notifications/NotificationItem";
 
-type NotificationFilter = "all" | "unread";
+import NotificationCard from "@/components/notifications/NotificationCard";
+import NotificationFilters, {
+  NotificationFilter,
+} from "@/components/notifications/NotificationFilters";
+import NotificationListState from "@/components/notifications/NotificationListState";
+import NotificationPageHeader from "@/components/notifications/NotificationPageHeader";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useMessages } from "@/i18n/useMessages";
+import { getNotificationCategory } from "@/utils/notifications";
 
 export default function NotificationsPage() {
+  const messages = useMessages();
+  const t = messages.notificationsPage;
+
   const {
     notifications,
     loading,
+    error,
     unreadCount,
+    loadNotifications,
     markAsRead,
     markAllAsRead,
   } = useNotifications();
@@ -19,134 +29,190 @@ export default function NotificationsPage() {
   const [filter, setFilter] =
     useState<NotificationFilter>("all");
 
-  const visibleNotifications = useMemo(() => {
-    if (filter === "unread") {
-      return notifications.filter(
-        (notification) => !notification.is_read
-      );
-    }
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("");
 
-    return notifications;
-  }, [notifications, filter]);
+  const categoryCounts = useMemo(() => {
+    return notifications.reduce(
+      (accumulator, notification) => {
+        const category =
+          getNotificationCategory(
+            notification.type
+          );
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-50 px-6 py-10">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-slate-600">
-            Se încarcă notificările...
-          </p>
-        </div>
-      </main>
+        accumulator.all += 1;
+
+        if (!notification.is_read) {
+          accumulator.unread += 1;
+        }
+
+        accumulator[category] += 1;
+
+        return accumulator;
+      },
+      {
+        all: 0,
+        unread: 0,
+        messages: 0,
+        transactions: 0,
+        auctions: 0,
+        reviews: 0,
+        reports: 0,
+        account: 0,
+      } satisfies Record<
+        NotificationFilter,
+        number
+      >
     );
-  }
+  }, [notifications]);
+
+  const filterOptions = [
+    {
+      value: "all",
+      label: t.filterAll,
+      count: categoryCounts.all,
+    },
+    {
+      value: "unread",
+      label: t.filterUnread,
+      count: categoryCounts.unread,
+    },
+    {
+      value: "messages",
+      label: t.filterMessages,
+      count: categoryCounts.messages,
+    },
+    {
+      value: "transactions",
+      label: t.filterTransactions,
+      count: categoryCounts.transactions,
+    },
+    {
+      value: "auctions",
+      label: t.filterAuctions,
+      count: categoryCounts.auctions,
+    },
+    {
+      value: "reviews",
+      label: t.filterReviews,
+      count: categoryCounts.reviews,
+    },
+    {
+      value: "reports",
+      label: t.filterReports,
+      count: categoryCounts.reports,
+    },
+    {
+      value: "account",
+      label: t.filterAccount,
+      count: categoryCounts.account,
+    },
+  ] as const;
+
+  const visibleNotifications = useMemo(() => {
+    const normalizedQuery =
+      searchQuery.trim().toLowerCase();
+
+    return notifications.filter(
+      (notification) => {
+        const matchesFilter =
+          filter === "all"
+            ? true
+            : filter === "unread"
+              ? !notification.is_read
+              : getNotificationCategory(
+                  notification.type
+                ) === filter;
+
+        if (!matchesFilter) {
+          return false;
+        }
+
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        const searchableText = [
+          notification.title,
+          notification.message,
+          notification.type,
+          notification.metadata?.productTitle,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(
+          normalizedQuery
+        );
+      }
+    );
+  }, [
+    notifications,
+    filter,
+    searchQuery,
+  ]);
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
-      <div className="mx-auto max-w-4xl">
-        <Link
-          href="/dashboard"
-          className="text-sm font-semibold text-slate-600 hover:text-slate-950"        >
-          ← Înapoi la licitații
-        </Link>
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <NotificationPageHeader
+          unreadCount={unreadCount}
+          loading={loading}
+          onMarkAllAsRead={() => {
+            void markAllAsRead();
+          }}
+        />
 
-        <section className="mt-6 rounded-3xl bg-slate-950 p-8 text-white">
-          <p className="text-sm font-bold uppercase tracking-wide text-orange-400">
-            Contul meu
-          </p>
+        <NotificationFilters
+          filter={filter}
+          searchQuery={searchQuery}
+          options={filterOptions}
+          onFilterChange={setFilter}
+          onSearchChange={setSearchQuery}
+        />
 
-          <h1 className="mt-2 text-4xl font-black">
-            Notificări
-          </h1>
+        {loading ? (
+          <NotificationListState type="loading" />
+        ) : error ? (
+          <NotificationListState
+            type="error"
+            message={error}
+            onRetry={() => {
+              void loadNotifications();
+            }}
+          />
+        ) : notifications.length === 0 ? (
+          <NotificationListState type="empty" />
+        ) : visibleNotifications.length === 0 ? (
+          <section className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h2 className="text-xl font-bold text-slate-950">
+              {t.noResultsTitle}
+            </h2>
 
-          <p className="mt-3 text-slate-300">
-             Urmărește ofertele, tranzacțiile, mesajele și
-            recenziile primite.
-          </p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-slate-300">
-                Total
-              </p>
-
-              <p className="mt-1 text-3xl font-black">
-                {notifications.length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-slate-300">
-                Necitite
-              </p>
-
-              <p className="mt-1 text-3xl font-black">
-                {unreadCount}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setFilter("all")}
-              className={`rounded-full px-5 py-2 text-sm font-bold ${
-                filter === "all"
-                  ? "bg-slate-950 text-white"
-                  : "bg-white text-slate-600 shadow-sm"
-              }`}
-            >
-              Toate
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilter("unread")}
-              className={`rounded-full px-5 py-2 text-sm font-bold ${
-                filter === "unread"
-                  ? "bg-slate-950 text-white"
-                  : "bg-white text-slate-600 shadow-sm"
-              }`}
-            >
-              Necitite ({unreadCount})
-            </button>
-          </div>
-
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              onClick={() => void markAllAsRead()}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-slate-50"
-            >
-              Marchează toate ca citite
-            </button>
-          )}
-        </div>
-
-        {visibleNotifications.length === 0 ? (
-          <section className="mt-8 rounded-3xl bg-white p-10 text-center shadow-sm">
-            <p className="text-xl font-bold text-slate-900">
-              {filter === "unread"
-                ? "Nu ai notificări necitite."
-                : "Nu ai notificări."}
-            </p>
-
-            <p className="mt-2 text-slate-500">
-              Notificările despre licitații și tranzacții
-              vor apărea aici.
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+              {t.noResultsDescription}
             </p>
           </section>
         ) : (
-          <section className="mt-8 space-y-3 rounded-3xl bg-white p-4 shadow-sm">
-            {visibleNotifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                onRead={markAsRead}
-              />
-            ))}
+          <section className="space-y-4">
+            {visibleNotifications.map(
+              (notification) => (
+                <NotificationCard
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={(
+                    notificationId
+                  ) => {
+                    void markAsRead(
+                      notificationId
+                    );
+                  }}
+                />
+              )
+            )}
           </section>
         )}
       </div>

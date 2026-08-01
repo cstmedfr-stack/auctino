@@ -1,41 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { supabase } from "@/lib/supabase";
 import { getProfile } from "@/services/profile.service";
-import { Profile } from "@/types/profile";
+import { useMessages } from "@/i18n/useMessages";
+import type { Profile } from "@/types/profile";
 
 export function useProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const messages = useMessages();
+  const t = messages.accountProfile.overview;
 
-  useEffect(() => {
-    const loadProfile = async () => {
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
+
+  const [userId, setUserId] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const loadProfile = useCallback(
+    async () => {
+      setLoading(true);
+      setError("");
+
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (userError || !user) {
+        setUserId("");
+        setProfile(null);
+        setError(t.authRequired);
         setLoading(false);
         return;
       }
 
-      const { data, error } = await getProfile(user.id);
+      setUserId(user.id);
 
-      if (error) {
-        console.error(error.message);
-      } else {
-        setProfile(data as Profile);
+      const {
+        data,
+        error: profileError,
+      } = await getProfile(user.id);
+
+      if (profileError || !data) {
+        console.error(
+          t.loadError,
+          profileError?.message
+        );
+
+        setProfile(null);
+        setError(t.loadError);
+        setLoading(false);
+        return;
       }
 
+      setProfile(data as Profile);
       setLoading(false);
-    };
+    },
+    [t.authRequired, t.loadError]
+  );
 
-    loadProfile();
-  }, []);
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   return {
     profile,
+    userId,
     loading,
+    error,
+    refreshProfile: loadProfile,
   };
 }

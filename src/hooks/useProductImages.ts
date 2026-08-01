@@ -16,10 +16,7 @@ export function useProductImages(productId: string) {
 
       const { data, error } = await getProductImages(productId);
 
-      console.log("product images data:", data);
-      console.log("product images error:", error);
-
-      setImages(data || []);
+           setImages(data || []);
       setLoading(false);
     }
 

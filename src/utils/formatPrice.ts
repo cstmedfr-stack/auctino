@@ -1,18 +1,38 @@
-export function formatPrice(
-  value: number | null | undefined
-) {
-  const price = Number(value ?? 0);
+import { currentMarket } from "@/config/market";
 
-  const formattedValue = price.toLocaleString(
-    "ro-RO",
+export function formatPrice(
+  value: number | string | null | undefined
+) {
+  if (value === null || value === undefined) {
+    return new Intl.NumberFormat(
+      currentMarket.formattingLocale,
+      {
+        style: "currency",
+        currency: currentMarket.currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }
+    ).format(0);
+  }
+
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return "";
+  }
+
+  return new Intl.NumberFormat(
+    currentMarket.formattingLocale,
     {
-      minimumFractionDigits:
-        Number.isInteger(price) ? 0 : 2,
+      style: "currency",
+      currency: currentMarket.currency,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }
-  );
-
-  return `${formattedValue} ${
-    Math.abs(price) === 1 ? "leu" : "lei"
-  }`;
+  ).format(numericValue);
 }
+
+export default formatPrice;

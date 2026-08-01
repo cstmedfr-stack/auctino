@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { SendMessagePayload } from "@/types/chat";
 
 export async function getConversation(
   productId: string,
@@ -19,11 +20,6 @@ export async function createConversation(
   sellerId: string,
   buyerId: string
 ) {
-  /*
-   * sellerId este păstrat în parametri pentru
-   * compatibilitate cu paginile existente.
-   * RPC-ul identifică vânzătorul direct din produs.
-   */
   void sellerId;
 
   return await supabase.rpc(
@@ -59,14 +55,15 @@ export async function getMessages(
 
 export async function sendMessage({
   conversationId,
+  senderId,
+  receiverId,
+  productId,
   content,
-}: {
-  conversationId: string;
-  senderId: string;
-  receiverId: string;
-  productId: string;
-  content: string;
-}) {
+}: SendMessagePayload) {
+  void senderId;
+  void receiverId;
+  void productId;
+
   const { data, error } = await supabase.rpc(
     "send_message_with_notification",
     {
@@ -110,9 +107,6 @@ export async function markMessagesAsRead(
   conversationId: string,
   currentUserId: string
 ) {
-  /*
-   * Identitatea reală este stabilită prin auth.uid().
-   */
   void currentUserId;
 
   return await supabase.rpc(

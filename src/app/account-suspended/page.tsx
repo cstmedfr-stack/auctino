@@ -6,7 +6,16 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import {
+  LogOut,
+  RefreshCcw,
+  ShieldAlert,
+} from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { useMessages } from "@/i18n/useMessages";
+import { formatLocalizedDateTime } from "@/i18n/format";
 
 type SuspensionInfo = {
   reason: string | null;
@@ -15,16 +24,25 @@ type SuspensionInfo = {
 
 export default function AccountSuspendedPage() {
   const router = useRouter();
+  const messages = useMessages();
+  const { locale } = useLocale();
+  const t = messages.accountSuspended;
 
-  const [suspensionInfo, setSuspensionInfo] =
-    useState<SuspensionInfo>({
-      reason: null,
-      suspendedAt: null,
-    });
+  const [
+    suspensionInfo,
+    setSuspensionInfo,
+  ] = useState<SuspensionInfo>({
+    reason: null,
+    suspendedAt: null,
+  });
 
-  const [checking, setChecking] = useState(true);
-  const [statusMessage, setStatusMessage] =
-    useState("");
+  const [checking, setChecking] =
+    useState(true);
+
+  const [
+    statusMessage,
+    setStatusMessage,
+  ] = useState("");
 
   const checkAccountStatus = useCallback(
     async (showMessage = false) => {
@@ -40,25 +58,24 @@ export default function AccountSuspendedPage() {
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select(
-            "account_status, suspension_reason, suspended_at"
-          )
-          .eq("id", user.id)
-          .maybeSingle();
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select(
+          "account_status, suspension_reason, suspended_at"
+        )
+        .eq("id", user.id)
+        .maybeSingle();
 
       if (profileError) {
-        console.error(
-          "Eroare la verificarea suspendării:",
+        console.warn(
+          "Suspended account check failed:",
           profileError.message
         );
 
-        setStatusMessage(
-          "Nu am putut verifica momentan starea contului."
-        );
-
+        setStatusMessage(t.verifyError);
         setChecking(false);
         return;
       }
@@ -78,14 +95,16 @@ export default function AccountSuspendedPage() {
       });
 
       if (showMessage) {
-        setStatusMessage(
-          "Contul este încă suspendat."
-        );
+        setStatusMessage(t.stillSuspended);
       }
 
       setChecking(false);
     },
-    [router]
+    [
+      router,
+      t.stillSuspended,
+      t.verifyError,
+    ]
   );
 
   useEffect(() => {
@@ -146,9 +165,12 @@ export default function AccountSuspendedPage() {
         )
         .subscribe();
 
-      statusInterval = window.setInterval(() => {
-        void checkAccountStatus(false);
-      }, 15000);
+      statusInterval = window.setInterval(
+        () => {
+          void checkAccountStatus(false);
+        },
+        15000
+      );
     }
 
     void initializePage();
@@ -160,9 +182,9 @@ export default function AccountSuspendedPage() {
         );
       }
 
-     if (statusInterval !== null) {
-  window.clearInterval(statusInterval);
-}
+      if (statusInterval !== null) {
+        window.clearInterval(statusInterval);
+      }
     };
   }, [checkAccountStatus, router]);
 
@@ -174,11 +196,10 @@ export default function AccountSuspendedPage() {
 
   const formattedSuspensionDate =
     suspensionInfo.suspendedAt
-      ? new Date(
-          suspensionInfo.suspendedAt
-        ).toLocaleString("ro-RO", {
-          timeZone: "Europe/Bucharest",
-        })
+      ? formatLocalizedDateTime(
+          suspensionInfo.suspendedAt,
+          locale
+        )
       : null;
 
   return (
@@ -186,34 +207,33 @@ export default function AccountSuspendedPage() {
       <div className="mx-auto max-w-2xl">
         <section className="overflow-hidden rounded-3xl border border-red-200 bg-white shadow-xl">
           <div className="bg-red-700 px-8 py-10 text-center text-white">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/15 text-4xl">
-              ⛔
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/15">
+              <ShieldAlert size={42} />
             </div>
 
             <h1 className="mt-5 text-3xl font-black">
-              Cont suspendat
+              {t.title}
             </h1>
 
-            <p className="mt-3 text-red-100">
-              Accesul la funcțiile platformei Vendora
-              este momentan restricționat.
+            <p className="mx-auto mt-3 max-w-lg text-red-100">
+              {t.description}
             </p>
           </div>
 
           <div className="space-y-6 p-8">
             <div className="rounded-2xl border border-red-100 bg-red-50 p-5">
               <p className="text-sm font-bold uppercase tracking-wide text-red-700">
-                Motivul suspendării
+                {t.reasonTitle}
               </p>
 
               <p className="mt-3 whitespace-pre-wrap text-slate-800">
                 {suspensionInfo.reason ||
-                  "Administratorul nu a furnizat un motiv suplimentar."}
+                  t.fallbackReason}
               </p>
 
               {formattedSuspensionDate && (
                 <p className="mt-4 text-sm text-slate-600">
-                  Suspendat la:{" "}
+                  {t.suspendedAt}:{" "}
                   <span className="font-semibold">
                     {formattedSuspensionDate}
                   </span>
@@ -222,10 +242,7 @@ export default function AccountSuspendedPage() {
             </div>
 
             <div className="rounded-2xl bg-slate-50 p-5 text-sm leading-6 text-slate-700">
-              Cât timp contul este suspendat, nu
-              poți publica produse, licita, trimite
-              mesaje, modifica tranzacții, publica
-              recenzii sau raporta produse.
+              {t.limitation}
             </div>
 
             {statusMessage && (
@@ -241,26 +258,35 @@ export default function AccountSuspendedPage() {
                   void checkAccountStatus(true)
                 }
                 disabled={checking}
-                className="rounded-xl bg-black px-5 py-3 font-bold text-white hover:bg-slate-800 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
               >
+                <RefreshCcw
+                  size={17}
+                  className={
+                    checking
+                      ? "animate-spin"
+                      : ""
+                  }
+                />
                 {checking
-                  ? "Se verifică..."
-                  : "Verifică din nou"}
+                  ? t.checking
+                  : t.checkAgain}
               </button>
 
               <button
                 type="button"
-                onClick={handleLogout}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 hover:bg-slate-50"
+                onClick={() => {
+                  void handleLogout();
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
               >
-                🚪 Deconectare
+                <LogOut size={17} />
+                {t.logout}
               </button>
             </div>
 
             <p className="text-center text-xs text-slate-500">
-              Pagina verifică automat starea contului.
-              După reactivare vei fi redirecționat în
-              aplicație.
+              {t.autoCheck}
             </p>
           </div>
         </section>

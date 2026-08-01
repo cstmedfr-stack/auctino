@@ -1,27 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { Button } from "../ui/Button";
-import { Badge } from "../ui/Badge";
-import { Card } from "../ui/Card";
-import { Container } from "../layout/Container";
-
-const benefits = [
-  "Publicare gratuită",
-  "Licitații în timp real",
-  "Cumpărătorii concurează pentru cel mai bun preț",
-];
+import { FormEvent, useState } from "react";
+import {
+  ArrowRight,
+  Bell,
+  Gavel,
+  Heart,
+  MessageCircle,
+  Package,
+  Search,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { useMessages } from "@/i18n/useMessages";
 
 export function Hero() {
+  const messages = useMessages();
+  const t = messages.home.hero;
+
   const router = useRouter();
   const [search, setSearch] = useState("");
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
 
     const query = search.trim();
 
@@ -30,124 +33,190 @@ export function Hero() {
       return;
     }
 
-    router.push(`/dashboard?search=${encodeURIComponent(query)}`);
+    router.push(
+      `/dashboard?search=${encodeURIComponent(query)}`
+    );
   }
 
   return (
-    <section className="bg-gradient-to-b from-orange-50 via-white to-white py-24">
-      <Container>
-        <div className="grid items-center gap-16 lg:grid-cols-2">
-          <div>
-            <Badge variant="accent" className="mb-6">
-              Marketplace românesc de licitații
-            </Badge>
+    <section className="relative overflow-hidden bg-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#eef2ff,transparent_34%),radial-gradient(circle_at_top_right,#f5f3ff,transparent_28%)]" />
 
-            <h1 className="mb-8 text-5xl font-extrabold leading-tight text-slate-900 md:text-6xl">
-              Vinde inteligent. Cumpără la cel mai bun preț.
-            </h1>
-
-            <p className="mb-8 max-w-xl text-lg leading-8 text-slate-600">
-              Publică gratuit produse, urmărește ofertele în timp real și lasă
-              cumpărătorii să liciteze pentru cel mai bun preț.
-            </p>
-
-            <form
-              onSubmit={handleSearch}
-              className="mb-6 flex max-w-xl flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row"
-            >
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Caută produse, categorii sau orașe..."
-                className="flex-1 rounded-2xl px-4 py-3 outline-none"
-              />
-
-              <Button type="submit">
-                🔍 Caută
-              </Button>
-            </form>
-
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-              <Link href="/add-product">
-                <Button size="lg">
-                  🚀 Vinde un produs
-                </Button>
-              </Link>
-
-              <Link href="/dashboard">
-                <Button variant="outline" size="lg">
-                  Vezi toate licitațiile
-                </Button>
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:flex-wrap">
-              {benefits.map((benefit) => (
-                <div key={benefit} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-orange-500" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
-            </div>
+      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-4 py-2 text-sm font-medium text-indigo-700 shadow-sm backdrop-blur">
+            <Sparkles size={16} />
+            {t.badge}
           </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-orange-100 blur-3xl" />
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+            {t.titleStart} {t.titleMiddle}{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              {t.titleAccent}
+            </span>
+          </h1>
 
-            <Card className="relative p-6">
-              <div className="mb-6 rounded-[24px] bg-slate-900 p-6 text-white">
-                <p className="text-sm text-slate-300">
-                  Licitație populară
-                </p>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+            {t.subtitle}
+          </p>
+<p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500">
+  {t.trustLine}
+</p>
+          <form
+  onSubmit={handleSubmit}
+  className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50"
+>
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex min-h-12 flex-1 items-center gap-3 px-3 sm:px-4">
+      <Search
+        className="shrink-0 text-slate-400"
+        size={22}
+      />
 
-                <h3 className="mt-3 text-3xl font-bold">
-                  iPhone 15 Pro
-                </h3>
+      <input
+        value={search}
+        onChange={(event) =>
+          setSearch(event.target.value)
+        }
+        className="min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
+        placeholder={t.searchPlaceholder}
+      />
+    </div>
 
-                <p className="mt-2 text-slate-300">
-                  256GB · Titanium · Ca nou
-                </p>
+    <button
+      type="submit"
+      className="inline-flex min-h-12 items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+    >
+      {t.searchButton}
+    </button>
+  </div>
+</form>
 
-                <div className="mt-8 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-slate-400">Oferta actuală</p>
-                    <p className="mt-1 text-3xl font-bold text-white">
-                      3.850 lei
-                    </p>
-                  </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm text-slate-500">
+            {t.suggestions.map((item) => (
+              <Link
+                key={item}
+                href={`/dashboard?search=${encodeURIComponent(
+                  item
+                )}`}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 transition hover:border-indigo-200 hover:text-indigo-700"
+              >
+                {item}
+              </Link>
+            ))}
+          </div>
 
-                  <div>
-                    <p className="text-sm text-slate-400">Timp rămas</p>
-                    <p className="mt-1 text-3xl font-bold text-orange-400">
-                      02:14:32
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700"
+            >
+              {t.primaryCta}
+              <ArrowRight size={18} />
+            </Link>
 
-              <div className="grid gap-3">
-                <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-                  <span className="font-semibold text-slate-800">
-                    🔥 18 oferte
-                  </span>
-                  <span className="text-sm text-slate-500">
-                    Activ acum
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-                  <span className="font-semibold text-slate-800">
-                    🛡 Vânzător verificat
-                  </span>
-                  <span className="text-sm text-slate-500">
-                    Trust Score 94
-                  </span>
-                </div>
-              </div>
-            </Card>
+            <Link
+              href="/add-product"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:border-indigo-200 hover:text-indigo-700"
+            >
+              {t.secondaryCta}
+            </Link>
           </div>
         </div>
-      </Container>
+
+        <div className="relative mx-auto mt-16 grid max-w-5xl gap-4 md:grid-cols-4">
+          <HeroInfoCard
+            icon={<Package size={20} />}
+            title={t.cards.product}
+            description={t.cards.productDescription}
+          />
+          <HeroInfoCard
+            icon={<Gavel size={20} />}
+            title={t.cards.auction}
+            description={t.cards.auctionDescription}
+          />
+          <HeroInfoCard
+            icon={<ShieldCheck size={20} />}
+            title={t.cards.offer}
+            description={t.cards.offerDescription}
+          />
+          <HeroInfoCard
+            icon={<MessageCircle size={20} />}
+            title={t.cards.chat}
+            description={t.cards.chatDescription}
+          />
+        </div>
+
+        <div className="pointer-events-none absolute left-8 top-40 hidden rotate-[-6deg] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/70 lg:block">
+          <div className="mb-3 flex h-24 w-40 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+            <Package size={30} />
+          </div>
+          <div className="text-sm font-semibold text-slate-950">
+            {t.cards.product}
+          </div>
+          <div className="mt-1 text-sm text-indigo-600">
+            Auctino
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute right-10 top-44 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/70 lg:block">
+          <div className="flex items-center gap-3">
+            <Bell
+              className="text-indigo-600"
+              size={20}
+            />
+            <div>
+              <div className="text-sm font-semibold text-slate-950">
+                {t.cards.offer}
+              </div>
+              <div className="text-xs text-slate-500">
+                Auctino
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute bottom-14 right-24 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/70 xl:block">
+          <div className="flex items-center gap-3">
+            <Heart
+              className="text-rose-500"
+              size={20}
+            />
+            <MessageCircle
+              className="text-indigo-600"
+              size={20}
+            />
+            <ShieldCheck
+              className="text-emerald-500"
+              size={20}
+            />
+          </div>
+        </div>
+      </div>
     </section>
+  );
+}
+
+function HeroInfoCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+      <div className="mb-3 text-indigo-600">
+        {icon}
+      </div>
+      <div className="text-base font-semibold text-slate-950">
+        {title}
+      </div>
+      <div className="mt-1 text-sm text-slate-500">
+        {description}
+      </div>
+    </div>
   );
 }

@@ -1,22 +1,36 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import {
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
+import { useMessages } from "@/i18n/useMessages";
 
 type AccountStatusGuardProps = {
   children: ReactNode;
 };
 
-type AccountStatus = "active" | "suspended";
+type AccountStatus =
+  | "active"
+  | "suspended";
 
-const SUSPENDED_ROUTE = "/account-suspended";
+const SUSPENDED_ROUTE =
+  "/account-suspended";
 
 export default function AccountStatusGuard({
   children,
 }: AccountStatusGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const messages = useMessages();
 
   const [checkingAccount, setCheckingAccount] =
     useState(true);
@@ -52,7 +66,10 @@ export default function AccountStatusGuard({
     async function removeProfileChannel() {
       if (!profileChannel) return;
 
-      await supabase.removeChannel(profileChannel);
+      await supabase.removeChannel(
+        profileChannel
+      );
+
       profileChannel = null;
     }
 
@@ -79,18 +96,21 @@ export default function AccountStatusGuard({
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("account_status")
-          .eq("id", user.id)
-          .maybeSingle();
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("account_status")
+        .eq("id", user.id)
+        .maybeSingle();
 
       if (!isMounted) return;
 
       if (profileError) {
-        console.error(
-          "Eroare la verificarea statutului contului:",
+        console.warn(
+          messages.guards
+            .accountStatusConsoleError,
           profileError.message
         );
 
@@ -99,7 +119,8 @@ export default function AccountStatusGuard({
       }
 
       const accountStatus: AccountStatus =
-        profile?.account_status === "suspended"
+        profile?.account_status ===
+        "suspended"
           ? "suspended"
           : "active";
 
@@ -118,9 +139,10 @@ export default function AccountStatusGuard({
             filter: `id=eq.${user.id}`,
           },
           (payload) => {
-            const updatedProfile = payload.new as {
-              account_status?: string | null;
-            };
+            const updatedProfile =
+              payload.new as {
+                account_status?: string | null;
+              };
 
             const updatedStatus: AccountStatus =
               updatedProfile.account_status ===
@@ -128,7 +150,9 @@ export default function AccountStatusGuard({
                 ? "suspended"
                 : "active";
 
-            applyAccountStatus(updatedStatus);
+            applyAccountStatus(
+              updatedStatus
+            );
           }
         )
         .subscribe();
@@ -151,10 +175,12 @@ export default function AccountStatusGuard({
       subscription.unsubscribe();
 
       if (profileChannel) {
-        void supabase.removeChannel(profileChannel);
+        void supabase.removeChannel(
+          profileChannel
+        );
       }
     };
-  }, [pathname, router]);
+  }, [pathname, router, messages.guards]);
 
   if (
     checkingAccount &&
@@ -163,10 +189,18 @@ export default function AccountStatusGuard({
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
         <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-black" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <Loader2
+              size={26}
+              className="animate-spin"
+            />
+          </div>
 
           <p className="font-semibold text-slate-700">
-            Se verifică starea contului...
+            {
+              messages.guards
+                .checkingAccountStatus
+            }
           </p>
         </div>
       </main>

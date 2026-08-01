@@ -24,35 +24,25 @@ export async function createReview(
     return {
       data: null,
       error: new Error(
-        "Recenzia trebuie asociată unei tranzacții."
+        "missing_transaction"
       ),
     };
   }
 
-  const { data, error } = await supabase.rpc(
+  return await supabase.rpc(
     "create_transaction_review",
     {
       p_transaction_id:
         review.transaction_id,
-
-      p_rating:
-        review.rating,
-
+      p_rating: review.rating,
       p_communication:
         review.communication ?? null,
-
       p_accuracy:
         review.accuracy ?? null,
-
       p_comment:
         review.comment ?? null,
     }
   );
-
-  return {
-    data,
-    error,
-  };
 }
 
 export async function getAverageRating(
@@ -98,10 +88,6 @@ export async function canReviewProduct(
   productId: string,
   currentUserId: string
 ) {
-  /*
-   * Parametrul este păstrat pentru compatibilitate.
-   * Identitatea reală este verificată prin auth.uid().
-   */
   void currentUserId;
 
   const { data, error } = await supabase.rpc(
@@ -112,11 +98,6 @@ export async function canReviewProduct(
   );
 
   if (error) {
-    console.error(
-      "Eroare la verificarea dreptului de recenzie:",
-      error.message
-    );
-
     return false;
   }
 

@@ -1,17 +1,28 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import {
+  useEffect,
+  useState,
+} from "react";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 
 import ProductForm from "@/components/forms/ProductForm";
 import ProductImageManager from "@/components/product/ProductImageManager";
+import ProductFormPageHeader from "@/components/forms/ProductFormPageHeader";
+import ProductFormPageState from "@/components/forms/ProductFormPageState";
 
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/types/product";
 import { getProductById } from "@/services/product.service";
+import { useMessages } from "@/i18n/useMessages";
 
 export default function EditProductPage() {
+  const messages = useMessages();
+  const t = messages.productFormPage;
+
   const params = useParams();
   const router = useRouter();
 
@@ -21,21 +32,24 @@ export default function EditProductPage() {
   const [product, setProduct] =
     useState<Product | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [pageError, setPageError] = useState("");
-  const [errorTitle, setErrorTitle] = useState(
-    "Produsul nu poate fi editat"
-  );
+  const [loading, setLoading] =
+    useState(true);
 
+const [pageError, setPageError] =
+  useState<string>("");
+
+  const [errorTitle, setErrorTitle] =
+  useState<string>(    t.cannotEditDefaultTitle
+  );
   useEffect(() => {
     let isMounted = true;
 
     async function fetchProduct() {
       if (!productId) {
         if (isMounted) {
-          setErrorTitle("Produsul nu a fost găsit");
+          setErrorTitle(t.notFoundTitle);
           setPageError(
-            "Adresa produsului nu este validă."
+            t.invalidProductAddress
           );
           setLoading(false);
         }
@@ -65,14 +79,14 @@ export default function EditProductPage() {
 
       if (error || !data) {
         console.error(
-          "Eroare editare produs:",
+          t.editConsoleError,
           error?.message
         );
 
         setProduct(null);
-        setErrorTitle("Produsul nu a fost găsit");
+        setErrorTitle(t.notFoundTitle);
         setPageError(
-          "Produsul solicitat nu există sau nu mai este disponibil."
+          t.requestedProductUnavailable
         );
         setLoading(false);
         return;
@@ -82,9 +96,9 @@ export default function EditProductPage() {
 
       if (loadedProduct.user_id !== user.id) {
         setProduct(null);
-        setErrorTitle("Acces interzis");
+        setErrorTitle(t.accessDeniedTitle);
         setPageError(
-          "Nu poți edita un produs publicat de alt utilizator."
+          t.otherUserProduct
         );
         setLoading(false);
         return;
@@ -95,11 +109,14 @@ export default function EditProductPage() {
 
       if (status === "removed") {
         setProduct(null);
-        setErrorTitle("Produs eliminat");
+        setErrorTitle(t.removedTitle);
         setPageError(
           loadedProduct.removal_reason
-            ? `Produsul a fost eliminat de administrator. Motiv: ${loadedProduct.removal_reason}`
-            : "Produsul a fost eliminat de administrator și nu mai poate fi editat."
+            ? t.removedWithReason.replace(
+                "{reason}",
+                loadedProduct.removal_reason
+              )
+            : t.removedNoEdit
         );
         setLoading(false);
         return;
@@ -107,19 +124,19 @@ export default function EditProductPage() {
 
       if (status === "sold") {
         setProduct(null);
-        setErrorTitle("Produs vândut");
-        setPageError(
-          "Un produs vândut nu mai poate fi modificat."
-        );
+        setErrorTitle(t.soldTitle);
+        setPageError(t.soldNoEdit);
         setLoading(false);
         return;
       }
 
       if (status === "transaction_pending") {
         setProduct(null);
-        setErrorTitle("Tranzacție în curs");
+        setErrorTitle(
+          t.transactionPendingTitle
+        );
         setPageError(
-          "Produsul nu poate fi modificat cât timp tranzacția este în curs."
+          t.transactionPendingNoEdit
         );
         setLoading(false);
         return;
@@ -130,10 +147,10 @@ export default function EditProductPage() {
         status === "expired"
       ) {
         setProduct(null);
-        setErrorTitle("Licitație încheiată");
-        setPageError(
-          "Un produs cu licitația încheiată nu mai poate fi modificat."
+        setErrorTitle(
+          t.auctionEndedTitle
         );
+        setPageError(t.endedNoEdit);
         setLoading(false);
         return;
       }
@@ -147,9 +164,11 @@ export default function EditProductPage() {
 
       if (auctionEndedByDate) {
         setProduct(null);
-        setErrorTitle("Licitație încheiată");
+        setErrorTitle(
+          t.auctionEndedTitle
+        );
         setPageError(
-          "Perioada licitației a expirat, iar produsul nu mai poate fi modificat."
+          t.auctionExpiredNoEdit
         );
         setLoading(false);
         return;
@@ -157,9 +176,11 @@ export default function EditProductPage() {
 
       if ((loadedProduct.bid_count ?? 0) > 0) {
         setProduct(null);
-        setErrorTitle("Produs cu oferte");
+        setErrorTitle(
+          t.productWithBidsTitle
+        );
         setPageError(
-          "Produsul nu mai poate fi modificat deoarece a primit deja cel puțin o ofertă."
+          t.productWithBidsNoEdit
         );
         setLoading(false);
         return;
@@ -174,78 +195,27 @@ export default function EditProductPage() {
     return () => {
       isMounted = false;
     };
-  }, [productId, router]);
+  }, [productId, router, t]);
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-gray-50 px-6 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl bg-white p-8 shadow-sm">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-black" />
-
-          <p className="text-center font-semibold text-gray-600">
-            Se verifică produsul...
-          </p>
-        </div>
-      </main>
-    );
+    return <ProductFormPageState type="loading" />;
   }
 
   if (!product) {
     return (
-      <main className="min-h-screen bg-gray-50 px-6 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-red-100 bg-white p-8 shadow-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl">
-            ⛔
-          </div>
-
-          <h1 className="mt-5 text-2xl font-bold text-gray-900">
-            {errorTitle}
-          </h1>
-
-          {pageError && (
-            <p className="mt-3 leading-7 text-gray-600">
-              {pageError}
-            </p>
-          )}
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/my-products"
-              className="rounded-xl bg-black px-5 py-3 font-semibold text-white hover:bg-gray-800"
-            >
-              ← Înapoi la produsele mele
-            </Link>
-
-            <Link
-              href={`/products/${productId}`}
-              className="rounded-xl border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              Vezi produsul
-            </Link>
-          </div>
-        </div>
-      </main>
+      <ProductFormPageState
+        type="error"
+        title={errorTitle}
+        message={pageError}
+        productId={productId || undefined}
+      />
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="mx-auto max-w-2xl rounded-3xl bg-white p-8 shadow-sm">
-        <Link
-          href="/my-products"
-          className="mb-6 inline-block text-sm font-medium text-gray-600 hover:text-black"
-        >
-          ← Înapoi la produsele mele
-        </Link>
-
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
-          Editează produs
-        </h1>
-
-        <p className="mb-8 text-gray-600">
-          Poți modifica produsul doar înainte să
-          primească prima ofertă.
-        </p>
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl">
+        <ProductFormPageHeader mode="edit" />
 
         <div className="mb-8">
           <ProductImageManager
@@ -254,10 +224,12 @@ export default function EditProductPage() {
           />
         </div>
 
-        <ProductForm
-          mode="edit"
-          product={product}
-        />
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <ProductForm
+            mode="edit"
+            product={product}
+          />
+        </section>
       </div>
     </main>
   );

@@ -1,65 +1,92 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { Review } from "@/types/review";
 import {
   getAverageRating,
   getUserReviews,
 } from "@/services/review.service";
+import { useMessages } from "@/i18n/useMessages";
 
 export function useReviews(userId: string) {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [averageRating, setAverageRating] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const messages = useMessages();
+  const t = messages.reviewsTrust;
 
-  const loadReviews = useCallback(async () => {
-    if (!userId) {
-      setReviews([]);
-      setAverageRating(0);
-      setError("");
-      setLoading(false);
-      return;
-    }
+  const [reviews, setReviews] =
+    useState<Review[]>([]);
 
-    setLoading(true);
-    setError("");
+  const [
+    averageRating,
+    setAverageRating,
+  ] = useState(0);
 
-    try {
-      const { data, error: reviewsError } =
-        await getUserReviews(userId);
+  const [loading, setLoading] =
+    useState(true);
 
-      if (reviewsError) {
+  const [error, setError] =
+    useState("");
+
+  const loadReviews = useCallback(
+    async () => {
+      if (!userId) {
         setReviews([]);
-        setError(reviewsError.message);
-      } else {
-        setReviews((data ?? []) as Review[]);
+        setAverageRating(0);
+        setError("");
+        setLoading(false);
+        return;
       }
 
-      const rating = await getAverageRating(userId);
+      setLoading(true);
+      setError("");
 
-      setAverageRating(
-        Number.isFinite(Number(rating))
-          ? Number(rating)
-          : 0
-      );
-    } catch (loadError) {
-      console.error("Eroare încărcare review-uri:", loadError);
+      try {
+        const {
+          data,
+          error: reviewsError,
+        } = await getUserReviews(userId);
 
-      setReviews([]);
-      setAverageRating(0);
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Review-urile nu au putut fi încărcate."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+        if (reviewsError) {
+          console.error(
+            t.loadError,
+            reviewsError.message
+          );
+
+          setReviews([]);
+          setError(t.loadError);
+        } else {
+          setReviews(
+            (data ?? []) as Review[]
+          );
+        }
+
+        const rating =
+          await getAverageRating(userId);
+
+        setAverageRating(
+          Number.isFinite(Number(rating))
+            ? Number(rating)
+            : 0
+        );
+      } catch (loadError) {
+        console.error(t.loadError, loadError);
+
+        setReviews([]);
+        setAverageRating(0);
+        setError(t.loadError);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId, t.loadError]
+  );
 
   useEffect(() => {
-    loadReviews();
+    void loadReviews();
   }, [loadReviews]);
 
   return {

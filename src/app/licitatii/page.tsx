@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function LicitatiiPage() {
-  return <h1>Pagina licitații</h1>;
+  redirect("/dashboard");
 }

@@ -1,4 +1,12 @@
-import StatCard from "../ui/StatCard";
+"use client";
+
+import {
+  Gavel,
+  Package,
+  Star,
+  Trophy,
+} from "lucide-react";
+import { useMessages } from "@/i18n/useMessages";
 
 type StatisticsCardProps = {
   activeProducts: number;
@@ -13,38 +21,66 @@ export default function StatisticsCard({
   wonAuctions,
   rating,
 }: StatisticsCardProps) {
+  const messages = useMessages();
+  const t = messages.publicProfile;
+
   return (
-    <div>
-      <h2 className="mb-5 text-2xl font-bold text-slate-900">
-        Statistici
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-5 text-xl font-bold text-slate-950">
+        {t.statisticsTitle}
       </h2>
 
-      <div className="grid grid-cols-2 gap-5">
-        <StatCard
-          icon="📦"
+      <div className="grid grid-cols-2 gap-4">
+        <StatisticItem
+          icon={<Package size={20} />}
           value={activeProducts}
-          label="Produse active"
+          label={t.activeProducts}
         />
 
-        <StatCard
-          icon="🏆"
+        <StatisticItem
+          icon={<Trophy size={20} />}
           value={soldProducts}
-          label="Produse vândute"
+          label={t.soldProducts}
         />
 
-        <StatCard
-          icon="💰"
+        <StatisticItem
+          icon={<Gavel size={20} />}
           value={wonAuctions}
-          label="Licitații câștigate"
+          label={t.wonAuctions}
         />
 
-        <StatCard
-          icon="⭐"
+        <StatisticItem
+          icon={<Star size={20} />}
           value={(rating ?? 0).toFixed(1)}
-          label="Rating"
-          color="text-amber-500"
+          label={t.rating}
         />
       </div>
+    </section>
+  );
+}
+
+function StatisticItem({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: number | string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-4">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-indigo-600">
+        {icon}
+      </div>
+
+      <p className="text-2xl font-black text-slate-950">
+        {value}
+      </p>
+
+      <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </p>
     </div>
   );
 }

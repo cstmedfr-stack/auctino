@@ -9,7 +9,7 @@ export interface Product {
   category_id: string | null;
   subcategory_id: string | null;
   condition: string | null;
-
+market_code: "RO" | "FR";
   starting_price: number;
   current_price: number | null;
 

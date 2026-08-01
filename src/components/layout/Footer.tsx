@@ -1,30 +1,89 @@
+"use client";
+
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Container } from "./Container";
+import { useMessages } from "@/i18n/useMessages";
 
 export function Footer() {
+  const messages = useMessages();
+  const t = messages.footer;
+
   return (
     <footer className="border-t border-slate-200 bg-white">
       <Container>
-        <div className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+        <div className="grid gap-8 py-10 sm:py-12 lg:grid-cols-[1.2fr_1fr] lg:items-start">
           <div>
-            <p className="text-xl font-bold text-slate-900">Vendora</p>
-            <p className="mt-2 text-sm text-slate-500">
-              Vinde prin licitație. Cumpără inteligent.
+            <Link
+              href="/"
+              className="inline-flex text-2xl font-extrabold tracking-tight text-slate-950"
+            >
+              Auctino
+            </Link>
+
+            <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
+              {t.tagline}
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-6 text-sm text-slate-600">
-            <Link href="/licitatii">Licitații</Link>
-            <Link href="/adauga-produs">Vinde</Link>
-            <Link href="/login">Login</Link>
-            <Link href="/register">Register</Link>
-          </div>
+          <nav className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
+            <FooterLink href="/dashboard">
+              {t.auctions}
+            </FooterLink>
+
+            <FooterLink href="/add-product">
+              {t.sell}
+            </FooterLink>
+
+            <FooterLink href="/login">
+              {t.login}
+            </FooterLink>
+
+            <FooterLink href="/register">
+              {t.register}
+            </FooterLink>
+
+            <FooterLink href="/terms">
+              {t.terms}
+            </FooterLink>
+
+            <FooterLink href="/privacy">
+              {t.privacy}
+            </FooterLink>
+
+            <FooterLink href="/safety">
+              {t.safety}
+            </FooterLink>
+
+            <FooterLink href="/contact">
+              {t.contact}
+            </FooterLink>
+          </nav>
         </div>
 
-        <div className="border-t border-slate-100 py-4 text-sm text-slate-400">
-          © 2026 Vendora. Toate drepturile rezervate.
+        <div className="flex flex-col gap-2 border-t border-slate-100 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© 2026 Auctino.</p>
+          <p>{t.rights}</p>
         </div>
       </Container>
     </footer>
+  );
+}
+
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex min-h-11 items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:text-indigo-700 sm:justify-center"
+    >
+      {children}
+      <ArrowRight size={14} />
+    </Link>
   );
 }

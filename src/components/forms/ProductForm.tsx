@@ -4,13 +4,31 @@ import {
   useEffect,
   useState,
 } from "react";
+import type {
+  ChangeEvent,
+  FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
+import {
+  AlertTriangle,
+  FileImage,
+  Loader2,
+  Save,
+  UploadCloud,
+  BadgeCheck,
+Sparkles,
+} from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/types/product";
-import {  createProduct,  refreshProductMainImage,  updateProduct,} from "@/services/product.service";
+import {
+  createProduct,
+  refreshProductMainImage,
+  updateProduct,
+} from "@/services/product.service";
 import { PRODUCT_CONDITIONS } from "@/constants/categories";
 import { ROMANIA_COUNTIES } from "@/constants/locations";
+import { useMessages } from "@/i18n/useMessages";
 
 import * as productImageService from "@/services/productImage.service";
 
@@ -31,6 +49,15 @@ type Subcategory = {
   name_ro: string;
 };
 
+const MAX_CREATE_IMAGES = 8;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
 function parseLocation(
   location: string | null | undefined
 ) {
@@ -50,11 +77,27 @@ function parseLocation(
   };
 }
 
+function formatMessage(
+  template: string,
+  values: Record<string, string | number>
+) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) =>
+      result.replace(
+        `{${key}}`,
+        String(value)
+      ),
+    template
+  );
+}
+
 export default function ProductForm({
   mode,
   product,
 }: ProductFormProps) {
   const router = useRouter();
+  const messages = useMessages();
+  const t = messages.productForm;
 
   const initialLocation = parseLocation(
     product?.location
@@ -79,8 +122,10 @@ export default function ProductForm({
     setCategoriesLoading,
   ] = useState(true);
 
-  const [subcategoriesLoading, setSubcategoriesLoading] =
-    useState(false);
+  const [
+    subcategoriesLoading,
+    setSubcategoriesLoading,
+  ] = useState(false);
 
   const [title, setTitle] = useState(
     product?.title ?? ""
@@ -110,13 +155,17 @@ export default function ProductForm({
   const [imageFiles, setImageFiles] =
     useState<File[]>([]);
 
+  const [imageInputKey, setImageInputKey] =
+    useState(0);
+
   const [auctionDuration, setAuctionDuration] =
     useState("7");
 
   const [loading, setLoading] =
     useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState<string>("");
 
   useEffect(() => {
     let isMounted = true;
@@ -136,7 +185,7 @@ export default function ProductForm({
 
       if (error) {
         console.error(
-          "Eroare categorii:",
+          t.categoriesConsoleError,
           error.message
         );
 
@@ -155,7 +204,7 @@ export default function ProductForm({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t.categoriesConsoleError]);
 
   useEffect(() => {
     let isMounted = true;
@@ -185,7 +234,7 @@ export default function ProductForm({
 
       if (error) {
         console.error(
-          "Eroare subcategorii:",
+          t.subcategoriesConsoleError,
           error.message
         );
 
@@ -204,7 +253,83 @@ export default function ProductForm({
     return () => {
       isMounted = false;
     };
-  }, [selectedCategoryId]);
+  }, [
+    selectedCategoryId,
+    t.subcategoriesConsoleError,
+  ]);
+
+  function resetImageInput() {
+    setImageFiles([]);
+    setImageInputKey(
+      (currentKey) => currentKey + 1
+    );
+  }
+
+  function handleImageSelection(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    setError("");
+
+    const selectedFiles =
+      event.target.files
+        ? Array.from(event.target.files)
+        : [];
+
+    if (selectedFiles.length === 0) {
+      setImageFiles([]);
+      return;
+    }
+
+    if (
+      selectedFiles.length >
+      MAX_CREATE_IMAGES
+    ) {
+      setError(t.maxImages);
+      resetImageInput();
+      return;
+    }
+
+    const invalidTypeFile =
+      selectedFiles.find(
+        (file) =>
+          !ALLOWED_IMAGE_TYPES.includes(
+            file.type
+          )
+      );
+
+    if (invalidTypeFile) {
+      setError(
+        formatMessage(
+          t.invalidImageType,
+          {
+            file: invalidTypeFile.name,
+          }
+        )
+      );
+
+      resetImageInput();
+      return;
+    }
+
+    const oversizedFile =
+      selectedFiles.find(
+        (file) =>
+          file.size > MAX_FILE_SIZE
+      );
+
+    if (oversizedFile) {
+      setError(
+        formatMessage(t.imageTooLarge, {
+          file: oversizedFile.name,
+        })
+      );
+
+      resetImageInput();
+      return;
+    }
+
+    setImageFiles(selectedFiles);
+  }
 
   function handleCategoryChange(
     categoryId: string
@@ -214,7 +339,7 @@ export default function ProductForm({
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -227,9 +352,7 @@ export default function ProductForm({
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      setError(
-        "Trebuie să fii autentificat pentru a adăuga sau edita un produs."
-      );
+      setError(t.authRequired);
       setLoading(false);
       return;
     }
@@ -239,41 +362,37 @@ export default function ProductForm({
       description.trim();
 
     if (cleanTitle.length < 3) {
-      setError(
-        "Titlul trebuie să conțină minimum 3 caractere."
-      );
+      setError(t.titleMinError);
       setLoading(false);
       return;
     }
 
     if (cleanDescription.length < 10) {
-      setError(
-        "Descrierea trebuie să conțină minimum 10 caractere."
-      );
+      setError(t.descriptionMinError);
       setLoading(false);
       return;
     }
 
     if (!selectedCategoryId) {
-      setError("Alege o categorie.");
+      setError(t.categoryRequired);
       setLoading(false);
       return;
     }
 
     if (!subcategoryId) {
-      setError("Alege o subcategorie.");
+      setError(t.subcategoryRequired);
       setLoading(false);
       return;
     }
 
     if (!condition) {
-      setError("Alege starea produsului.");
+      setError(t.conditionRequired);
       setLoading(false);
       return;
     }
 
     if (!county) {
-      setError("Alege județul.");
+      setError(t.countyRequired);
       setLoading(false);
       return;
     }
@@ -281,7 +400,7 @@ export default function ProductForm({
     const cleanCity = city.trim();
 
     if (!cleanCity) {
-      setError("Scrie orașul.");
+      setError(t.cityRequired);
       setLoading(false);
       return;
     }
@@ -295,75 +414,45 @@ export default function ProductForm({
       ) ||
       numericStartingPrice < 1
     ) {
-      setError(
-        "Prețul de pornire trebuie să fie de minimum 1 leu."
-      );
+      setError(t.startingPriceMinError);
       setLoading(false);
       return;
     }
-
-    const selectedCategory =
-      categories.find(
-        (category) =>
-          category.id ===
-          selectedCategoryId
-      );
-
-    const selectedSubcategory =
-      subcategories.find(
-        (subcategory) =>
-          subcategory.id ===
-          subcategoryId
-      );
-
-    const categoryLabel =
-      selectedCategory &&
-      selectedSubcategory
-        ? `${selectedCategory.name_ro} > ${selectedSubcategory.name_ro}`
-        : product?.category ??
-          selectedCategory?.name_ro ??
-          "";
 
     const location =
       `${county}, ${cleanCity}`;
 
     if (mode === "create") {
       try {
-        const auctionEnd = new Date();
-
-        auctionEnd.setDate(
-          auctionEnd.getDate() +
-            Number(auctionDuration)
-        );
-
         const {
-  data: createdProduct,
-  error: createError,
-} = await createProduct({
-  title: cleanTitle,
-  description: cleanDescription,
-  categoryId: selectedCategoryId,
-  subcategoryId,
-  condition,
-  startingPrice:
-    numericStartingPrice,
-  location,
-  durationDays:
-    Number(auctionDuration),
-});
+          data: createdProduct,
+          error: createError,
+        } = await createProduct({
+          title: cleanTitle,
+          description: cleanDescription,
+          categoryId: selectedCategoryId,
+          subcategoryId,
+          condition,
+          startingPrice:
+            numericStartingPrice,
+          location,
+          durationDays:
+            Number(auctionDuration),
+        });
 
-if (
-  createError ||
-  !createdProduct
-) {
-  setError(
-    createError?.message ??
-      "Produsul nu a putut fi creat."
-  );
+        if (
+          createError ||
+          !createdProduct
+        ) {
+          setError(
+            createError?.message ??
+              t.createError
+          );
 
-  setLoading(false);
-  return;
-}
+          setLoading(false);
+          return;
+        }
+
         if (imageFiles.length > 0) {
           const uploadedImages =
             await productImageService.uploadProductImages(
@@ -374,10 +463,11 @@ if (
 
           if (uploadedImages.length > 0) {
             const {
-  error: imageUpdateError,
-} = await refreshProductMainImage(
-  createdProduct.id
-);
+              error: imageUpdateError,
+            } =
+              await refreshProductMainImage(
+                createdProduct.id
+              );
 
             if (imageUpdateError) {
               setError(
@@ -398,7 +488,7 @@ if (
         setError(
           uploadError instanceof Error
             ? uploadError.message
-            : "Imaginile produsului nu au putut fi încărcate."
+            : t.uploadError
         );
 
         setLoading(false);
@@ -408,9 +498,7 @@ if (
 
     if (mode === "edit" && product) {
       if (product.user_id !== user.id) {
-        setError(
-          "Nu poți edita produsul altui utilizator."
-        );
+        setError(t.editOtherUserError);
         setLoading(false);
         return;
       }
@@ -432,7 +520,7 @@ if (
       ) {
         setError(
           currentProductError?.message ??
-            "Produsul nu mai există."
+            t.productMissingError
         );
 
         setLoading(false);
@@ -442,9 +530,7 @@ if (
       if (
         currentProduct.user_id !== user.id
       ) {
-        setError(
-          "Nu poți edita produsul altui utilizator."
-        );
+        setError(t.editOtherUserError);
         setLoading(false);
         return;
       }
@@ -453,9 +539,7 @@ if (
         currentProduct.status ?? "active";
 
       if (currentStatus !== "active") {
-        setError(
-          "Produsul nu mai poate fi editat deoarece licitația nu mai este activă."
-        );
+        setError(t.editInactiveError);
         setLoading(false);
         return;
       }
@@ -463,9 +547,7 @@ if (
       if (
         (currentProduct.bid_count ?? 0) > 0
       ) {
-        setError(
-          "Produsul nu mai poate fi editat deoarece a primit deja o ofertă."
-        );
+        setError(t.editWithBidError);
         setLoading(false);
         return;
       }
@@ -478,33 +560,29 @@ if (
           : false;
 
       if (auctionEnded) {
-        setError(
-          "Perioada licitației a expirat. Produsul nu mai poate fi editat."
-        );
+        setError(t.editExpiredError);
         setLoading(false);
         return;
       }
 
       const {
-  data: updatedProduct,
-  error: updateError,
-} = await updateProduct(
-  product.id,
-  {
-    title: cleanTitle,
-    description: cleanDescription,
-    categoryId:
-      selectedCategoryId,
-    subcategoryId,
-    condition,
-    location,
-  }
-);
+        data: updatedProduct,
+      } = await updateProduct(
+        product.id,
+        {
+          title: cleanTitle,
+          description:
+            cleanDescription,
+          categoryId:
+            selectedCategoryId,
+          subcategoryId,
+          condition,
+          location,
+        }
+      );
 
       if (!updatedProduct) {
-        setError(
-          "Produsul nu a putut fi modificat. Este posibil să fi primit între timp o ofertă sau să nu mai fie activ."
-        );
+        setError(t.updateError);
         setLoading(false);
         return;
       }
@@ -515,31 +593,67 @@ if (
     }
   }
 
+  const submitLabel =
+    loading
+      ? mode === "create"
+        ? t.submittingCreate
+        : t.submittingEdit
+      : mode === "create"
+        ? t.submitCreate
+        : t.submitEdit;
+
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-5"
     >
+      <div className="rounded-3xl border border-indigo-100 bg-indigo-50 p-5">
+  <p className="inline-flex items-center gap-2 text-base font-black text-indigo-900">
+    <Sparkles size={18} />
+    {t.conversionTipsTitle}
+  </p>
+
+  <p className="mt-2 text-sm leading-6 text-indigo-700">
+    {t.conversionTipsDescription}
+  </p>
+
+  <div className="mt-4 grid gap-3 md:grid-cols-3">
+    <ProductFormTip>
+      {t.conversionTipImages}
+    </ProductFormTip>
+
+    <ProductFormTip>
+      {t.conversionTipTitle}
+    </ProductFormTip>
+
+    <ProductFormTip>
+      {t.conversionTipPrice}
+    </ProductFormTip>
+  </div>
+</div>
+
       {mode === "create" && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Imagini produs
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
+            {t.imagesLabel}
           </label>
 
+          <p className="mb-3 text-sm leading-6 text-slate-500">
+            {t.imagesDescription}
+          </p>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
+  <UploadCloud size={15} />
+  {formatMessage(t.selectedImagesCount, {
+    count: imageFiles.length,
+  })}
+</div>
           <input
+            key={imageInputKey}
             type="file"
             multiple
-            accept="image/*"
-            onChange={(event) =>
-              setImageFiles(
-                event.target.files
-                  ? Array.from(
-                      event.target.files
-                    )
-                  : []
-              )
-            }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageSelection}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50"
           />
 
           {imageFiles.length > 0 && (
@@ -548,9 +662,18 @@ if (
                 (file, index) => (
                   <div
                     key={`${file.name}-${index}`}
-                    className="rounded-xl bg-slate-100 px-3 py-2 text-sm"
+                    className="inline-flex max-w-full items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm text-slate-700"
                   >
-                    📷 {file.name}
+                    <FileImage
+                      size={16}
+                      className="shrink-0 text-slate-500"
+                    />
+                    <span className="sr-only">
+                      {t.selectedFile}
+                    </span>
+                    <span className="truncate">
+                      {file.name}
+                    </span>
                   </div>
                 )
               )}
@@ -559,11 +682,7 @@ if (
         </div>
       )}
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
-          Titlu produs
-        </label>
-
+      <FormField label={t.titleLabel}>
         <input
           type="text"
           required
@@ -573,16 +692,12 @@ if (
           onChange={(event) =>
             setTitle(event.target.value)
           }
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-          placeholder="Ex: iPhone 14 Pro Max"
+          className={inputClassName}
+          placeholder={t.titlePlaceholder}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
-          Descriere
-        </label>
-
+      <FormField label={t.descriptionLabel}>
         <textarea
           required
           minLength={10}
@@ -593,17 +708,15 @@ if (
               event.target.value
             )
           }
-          className="min-h-32 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-          placeholder="Scrie câteva detalii despre produs..."
+          className={`${inputClassName} min-h-36 resize-y`}
+          placeholder={
+            t.descriptionPlaceholder
+          }
         />
-      </div>
+      </FormField>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Categorie
-          </label>
-
+        <FormField label={t.categoryLabel}>
           <select
             required
             value={selectedCategoryId}
@@ -613,12 +726,12 @@ if (
               )
             }
             disabled={categoriesLoading}
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black disabled:bg-gray-100 disabled:text-gray-500"
+            className={inputClassName}
           >
             <option value="">
               {categoriesLoading
-                ? "Se încarcă..."
-                : "Alege categoria"}
+                ? t.loading
+                : t.chooseCategory}
             </option>
 
             {categories.map((category) => (
@@ -626,18 +739,16 @@ if (
                 key={category.id}
                 value={category.id}
               >
-                {category.icon}{" "}
+                {category.icon
+                  ? `${category.icon} `
+                  : ""}
                 {category.name_ro}
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Subcategorie
-          </label>
-
+        <FormField label={t.subcategoryLabel}>
           <select
             required
             value={subcategoryId}
@@ -650,14 +761,14 @@ if (
               !selectedCategoryId ||
               subcategoriesLoading
             }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black disabled:bg-gray-100 disabled:text-gray-500"
+            className={inputClassName}
           >
             <option value="">
               {!selectedCategoryId
-                ? "Alege întâi categoria"
+                ? t.chooseCategoryFirst
                 : subcategoriesLoading
-                  ? "Se încarcă..."
-                  : "Alege subcategoria"}
+                  ? t.loading
+                  : t.chooseSubcategory}
             </option>
 
             {subcategories.map(
@@ -671,14 +782,10 @@ if (
               )
             )}
           </select>
-        </div>
+        </FormField>
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
-          Stare produs
-        </label>
-
+      <FormField label={t.conditionLabel}>
         <select
           required
           value={condition}
@@ -687,10 +794,10 @@ if (
               event.target.value
             )
           }
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+          className={inputClassName}
         >
           <option value="">
-            Alege starea
+            {t.chooseCondition}
           </option>
 
           {PRODUCT_CONDITIONS.map(
@@ -704,24 +811,20 @@ if (
             )
           )}
         </select>
-      </div>
+      </FormField>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Județ
-          </label>
-
+        <FormField label={t.countyLabel}>
           <select
             required
             value={county}
             onChange={(event) =>
               setCounty(event.target.value)
             }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+            className={inputClassName}
           >
             <option value="">
-              Alege județul
+              {t.chooseCounty}
             </option>
 
             {ROMANIA_COUNTIES.map(
@@ -735,13 +838,9 @@ if (
               )
             )}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Oraș
-          </label>
-
+        <FormField label={t.cityLabel}>
           <input
             type="text"
             required
@@ -749,17 +848,13 @@ if (
             onChange={(event) =>
               setCity(event.target.value)
             }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
-            placeholder="Timișoara"
+            className={inputClassName}
+            placeholder={t.cityPlaceholder}
           />
-        </div>
+        </FormField>
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
-          Preț de pornire
-        </label>
-
+      <FormField label={t.startingPriceLabel}>
         <input
           type="number"
           required
@@ -772,24 +867,23 @@ if (
               event.target.value
             )
           }
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black disabled:bg-gray-100 disabled:text-gray-500"
-          placeholder="100"
+          className={inputClassName}
+          placeholder={
+            t.startingPricePlaceholder
+          }
         />
 
         {mode === "edit" && (
-          <p className="mt-2 text-xs text-gray-500">
-            Prețul de pornire nu poate fi
-            modificat după publicare.
+          <p className="mt-2 text-xs text-slate-500">
+            {t.startingPriceEditHint}
           </p>
         )}
-      </div>
+      </FormField>
 
       {mode === "create" && (
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Durata licitației
-          </label>
-
+        <FormField
+          label={t.auctionDurationLabel}
+        >
           <select
             value={auctionDuration}
             onChange={(event) =>
@@ -797,23 +891,35 @@ if (
                 event.target.value
               )
             }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-black"
+            className={inputClassName}
           >
-            <option value="1">1 zi</option>
-            <option value="3">3 zile</option>
-            <option value="5">5 zile</option>
-            <option value="7">7 zile</option>
+            <option value="1">
+              {t.durationOneDay}
+            </option>
+            <option value="3">
+              {t.durationThreeDays}
+            </option>
+            <option value="5">
+              {t.durationFiveDays}
+            </option>
+            <option value="7">
+              {t.durationSevenDays}
+            </option>
             <option value="10">
-              10 zile
+              {t.durationTenDays}
             </option>
           </select>
-        </div>
+        </FormField>
       )}
 
       {error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-600">
+        <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+          <AlertTriangle
+            size={18}
+            className="mt-0.5 shrink-0"
+          />
           {error}
-        </p>
+        </div>
       )}
 
       <button
@@ -823,16 +929,55 @@ if (
           categoriesLoading ||
           subcategoriesLoading
         }
-        className="w-full rounded-xl bg-black px-5 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading
-          ? mode === "create"
-            ? "Se adaugă..."
-            : "Se salvează..."
-          : mode === "create"
-            ? "Adaugă produs"
-            : "Salvează modificările"}
+        {loading ? (
+          <Loader2
+            size={18}
+            className="animate-spin"
+          />
+        ) : (
+          <Save size={18} />
+        )}
+
+        {submitLabel}
       </button>
     </form>
+  );
+}
+
+const inputClassName =
+  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 disabled:bg-slate-50 disabled:text-slate-400";
+
+function FormField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-semibold text-slate-700">
+        {label}
+      </label>
+
+      {children}
+    </div>
+  );
+}
+function ProductFormTip({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-2 rounded-2xl bg-white/80 p-3 text-sm font-semibold leading-6 text-indigo-800">
+      <BadgeCheck
+        size={16}
+        className="mt-1 shrink-0"
+      />
+      <span>{children}</span>
+    </div>
   );
 }
