@@ -1,27 +1,49 @@
+
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+
 import {
   ArrowRight,
   Bell,
   Gavel,
   Heart,
+  Lightbulb,
   MessageCircle,
   Package,
   Search,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+
 import { useMessages } from "@/i18n/useMessages";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export function Hero() {
   const messages = useMessages();
   const t = messages.home.hero;
 
+  const { locale } = useLocale();
+
   const router = useRouter();
   const [search, setSearch] = useState("");
+
+  const suggestionText =
+    locale === "fr"
+      ? {
+          title: "Construisons Auctino ensemble !",
+          description:
+            "Vous avez une idée, une suggestion ou une nouvelle catégorie à proposer ?",
+          button: "Partagez votre idée",
+        }
+      : {
+          title: "Construim Auctino împreună!",
+          description:
+            "Ai o idee, o sugestie sau o categorie nouă pe care ai vrea să o găsești?",
+          button: "Trimite o sugestie",
+        };
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -59,38 +81,40 @@ export function Hero() {
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
             {t.subtitle}
           </p>
-<p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500">
-  {t.trustLine}
-</p>
+
+          <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500">
+            {t.trustLine}
+          </p>
+
           <form
-  onSubmit={handleSubmit}
-  className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50"
->
-  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-    <div className="flex min-h-12 flex-1 items-center gap-3 px-3 sm:px-4">
-      <Search
-        className="shrink-0 text-slate-400"
-        size={22}
-      />
+            onSubmit={handleSubmit}
+            className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-50"
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex min-h-12 flex-1 items-center gap-3 px-3 sm:px-4">
+                <Search
+                  className="shrink-0 text-slate-400"
+                  size={22}
+                />
 
-      <input
-        value={search}
-        onChange={(event) =>
-          setSearch(event.target.value)
-        }
-        className="min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
-        placeholder={t.searchPlaceholder}
-      />
-    </div>
+                <input
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
+                  className="min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
+                  placeholder={t.searchPlaceholder}
+                />
+              </div>
 
-    <button
-      type="submit"
-      className="inline-flex min-h-12 items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-    >
-      {t.searchButton}
-    </button>
-  </div>
-</form>
+              <button
+                type="submit"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+              >
+                {t.searchButton}
+              </button>
+            </div>
+          </form>
 
           <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm text-slate-500">
             {t.suggestions.map((item) => (
@@ -122,6 +146,34 @@ export function Hero() {
               {t.secondaryCta}
             </Link>
           </div>
+
+          {/* Sugestii comunitate - RO / FR */}
+          <div className="mx-auto mt-9 max-w-2xl rounded-2xl border border-indigo-100 bg-indigo-50/70 px-5 py-5 shadow-sm sm:px-7">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:text-left">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
+                <Lightbulb size={23} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-bold text-slate-900">
+                  {suggestionText.title}
+                </h2>
+
+                <p className="mt-1 text-xs leading-5 text-slate-600 sm:text-sm">
+                  {suggestionText.description}
+                </p>
+              </div>
+
+              <Link
+                href="/sugestii"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:border-indigo-400 hover:bg-indigo-100"
+              >
+                {suggestionText.button}
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+          {/* Sfarsit sectiune sugestii */}
         </div>
 
         <div className="relative mx-auto mt-16 grid max-w-5xl gap-4 md:grid-cols-4">
@@ -130,16 +182,19 @@ export function Hero() {
             title={t.cards.product}
             description={t.cards.productDescription}
           />
+
           <HeroInfoCard
             icon={<Gavel size={20} />}
             title={t.cards.auction}
             description={t.cards.auctionDescription}
           />
+
           <HeroInfoCard
             icon={<ShieldCheck size={20} />}
             title={t.cards.offer}
             description={t.cards.offerDescription}
           />
+
           <HeroInfoCard
             icon={<MessageCircle size={20} />}
             title={t.cards.chat}
@@ -151,9 +206,11 @@ export function Hero() {
           <div className="mb-3 flex h-24 w-40 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
             <Package size={30} />
           </div>
+
           <div className="text-sm font-semibold text-slate-950">
             {t.cards.product}
           </div>
+
           <div className="mt-1 text-sm text-indigo-600">
             Auctino
           </div>
@@ -165,10 +222,12 @@ export function Hero() {
               className="text-indigo-600"
               size={20}
             />
+
             <div>
               <div className="text-sm font-semibold text-slate-950">
                 {t.cards.offer}
               </div>
+
               <div className="text-xs text-slate-500">
                 Auctino
               </div>
@@ -182,10 +241,12 @@ export function Hero() {
               className="text-rose-500"
               size={20}
             />
+
             <MessageCircle
               className="text-indigo-600"
               size={20}
             />
+
             <ShieldCheck
               className="text-emerald-500"
               size={20}
@@ -202,7 +263,7 @@ function HeroInfoCard({
   title,
   description,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
 }) {
@@ -211,9 +272,11 @@ function HeroInfoCard({
       <div className="mb-3 text-indigo-600">
         {icon}
       </div>
+
       <div className="text-base font-semibold text-slate-950">
         {title}
       </div>
+
       <div className="mt-1 text-sm text-slate-500">
         {description}
       </div>

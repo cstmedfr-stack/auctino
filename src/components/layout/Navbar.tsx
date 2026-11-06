@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import {
   useEffect,
   useRef,
@@ -242,15 +242,23 @@ export function Navbar() {
         <div className="py-3">
           <div className="flex min-h-12 items-center justify-between gap-3">
             <Link
-              href={
-                isSuspended
-                  ? "/account-suspended"
-                  : "/"
-              }
-              className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl"
-            >
-              Auctino
-            </Link>
+  href={
+    isSuspended
+      ? "/account-suspended"
+      : "/"
+  }
+  className="inline-flex items-center"
+  aria-label="Auctino"
+>
+  <Image
+    src="/images/auctino-logo.png"
+    alt="Auctino"
+    width={180}
+    height={64}
+    priority
+    className="h-12 w-auto object-contain sm:h-14"
+  />
+</Link>
 
             <div className="hidden items-center gap-3 xl:flex">
               {!user ? (

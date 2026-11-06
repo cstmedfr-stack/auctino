@@ -10,6 +10,7 @@
     "i18n:audit": "node scripts/i18n-audit.mjs"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.3",
     "@supabase/supabase-js": "^2.108.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.21.0",
