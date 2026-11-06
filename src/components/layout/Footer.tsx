@@ -31,6 +31,9 @@ const { locale } = useLocale();
             <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
               {t.tagline}
             </p>
+            
+
+
           </div>
 
           <nav className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
@@ -54,6 +57,11 @@ const { locale } = useLocale();
   {locale === "fr"
     ? "Suggestions et améliorations"
     : "Sugestii și îmbunătățiri"}
+</FooterLink>
+<FooterLink href="/informatii-legale">
+  {locale === "fr"
+    ? "Mentions légales – Arrêté 225/2023"
+    : "Informații legale – Ordin 225/2023"}
 </FooterLink>
 
             <FooterLink href="/terms">
