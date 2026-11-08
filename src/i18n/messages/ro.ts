@@ -63,7 +63,7 @@ productPage: {
   soldBy: "Vândut de",
   viewProfile: "Vezi profil",
   sellerAvatar: "Imagine vânzător",
-  defaultSellerName: "Utilizator Auctino",
+  defaultSellerName: "Utilizator Vandivo",
   trust: "Trust",
   rating: "Rating",
   sellerBadge: "Badge vânzător",
@@ -271,8 +271,8 @@ selectedImagesCount:  "{count}/8 imagini selectate",
     noProductsTitle:    "Acest utilizator nu are produse active.",
     noProductsDescription:    "Revino mai târziu pentru a vedea dacă publică licitații noi.",
   sellerProfile: "Profil vânzător",
-defaultUserName: "Utilizator Auctino",
-activeSeller: "Membru Auctino • vânzător activ",
+defaultUserName: "Utilizator Vandivo",
+activeSeller: "Membru Vandivo • vânzător activ",
 locationLabel: "Locație",
 trustScore: "Trust Score",
 rating: "Rating",
@@ -309,12 +309,12 @@ trustScoreLabels: {
     soldProducts: "Minimum 10 produse vândute",    wonAuctions: "Minimum 5 licitații câștigate",    accountAge: "Cont mai vechi de 6 luni",
   },
 },
-badgeLabels: {  trustedSellerElite: {    title: "Trusted Seller Elite",    description:      "Vânzător cu reputație excelentă pe Auctino.",  },
+badgeLabels: {  trustedSellerElite: {    title: "Trusted Seller Elite",    description:      "Vânzător cu reputație excelentă pe Vandivo.",  },
   trustedSeller: {    title: "Trusted Seller",    description:      "Utilizator cu nivel ridicat de încredere.",  },
   activeSeller: {    title: "Vânzător activ",    description:      "A vândut minimum 10 produse.",  },
   auctionWinner: {    title: "Licitații câștigate",    description:      "A câștigat minimum 5 licitații.",  },
   topRated: {    title: "Top Rated",    description:      "Are rating foarte bun din review-uri.",  },
-  newMember: {    title: "Membru nou",    description:      "La început de drum pe Auctino.",  },
+  newMember: {    title: "Membru nou",    description:      "La început de drum pe Vandivo.",  },
 },
 
 },
@@ -331,7 +331,7 @@ chat: {
   noMessagesPreview: "Nicio conversație încă",
   youPrefix: "Tu: ",
   unreadLabel: "Mesaj necitit",
-  selectTitle: "Chat Auctino",
+  selectTitle: "Chat Vandivo",
   selectDescription:    "Selectează o conversație din listă pentru a continua discuția.",
   loadingChat: "Se încarcă chat-ul...",
   chatTitle: "Conversație",
@@ -445,7 +445,7 @@ auth: {
   login: {
     eyebrow: "Autentificare",
     title: "Intră în cont",
-    description:      "Accesează contul tău Auctino pentru a licita, vinde și gestiona produsele salvate.",
+    description:      "Accesează contul tău Vandivo pentru a licita, vinde și gestiona produsele salvate.",
     emailLabel: "Email",
     emailPlaceholder: "nume@email.com",
     passwordLabel: "Parolă",
@@ -476,7 +476,7 @@ auth: {
   },
   shell: {
     trustTitle: "Marketplace sigur pentru licitații moderne",
-    trustDescription:      "Auctino combină licitații, profiluri publice, mesagerie, tranzacții și notificări într-o experiență simplă și de încredere.",
+    trustDescription:      "Vandivo combină licitații, profiluri publice, mesagerie, tranzacții și notificări într-o experiență simplă și de încredere.",
     benefitOne: "Produse verificate prin comunitate",
     benefitTwo: "Conversații și tranzacții într-un singur loc",
     benefitThree: "Experiență optimizată pentru cumpărători și vânzători",
@@ -507,7 +507,7 @@ accountProfile: {
   overview: {
     eyebrow: "Contul meu",
     title: "Profil și reputație",
-    description:      "Gestionează informațiile contului, reputația, verificările și activitatea ta pe Auctino.",
+    description:      "Gestionează informațiile contului, reputația, verificările și activitatea ta pe Vandivo.",
     editProfile: "Editează profilul",
     publicProfile: "Vezi profilul public",
     loadingTitle: "Se încarcă profilul...",
@@ -647,7 +647,7 @@ reviewsTrust: {
   starLabelSingular: "1 stea",
 },
 adminReports: {
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Produse raportate",
   description:    "Verifică raportările trimise de utilizatori și decide dacă produsul rămâne activ sau este eliminat.",
   backToAdmin: "Înapoi la administrare",
@@ -778,7 +778,7 @@ receivedBidsPage: {
 },
 
 categoriesPage: {
-  eyebrow: "Auctino",
+  eyebrow: "Vandivo",
   title: "Explorează categoriile",
   description:
     "Descoperă rapid produsele și licitațiile care te interesează.",
@@ -845,12 +845,12 @@ notifications: "Notificări",
   receivedBids: "Oferte primite",
   adminPanel: "Panou administrare",
   profileSettings: "Setările profilului",
-  defaultUser: "Utilizator Auctino",
+  defaultUser: "Utilizator Vandivo",
   profileImage: "Imagine profil",
 },
 
 marketplace: {
-  heroEyebrow: "Marketplace Auctino",
+  heroEyebrow: "Marketplace Vandivo",
   heroTitle: "Marketplace-ul tău de licitații",
   heroDescription:    "Adaugă produse, urmărește licitații și descoperă oferte active într-un singur loc.",
   addProduct: "Adaugă produs",
@@ -926,7 +926,7 @@ productImageManager: {
 
 adminUsers: {
   backToAdmin: "Înapoi la administrare",
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Administrare utilizatori",
   description:    "Caută utilizatori și gestionează suspendarea sau reactivarea conturilor.",
   loadingTitle: "Se încarcă utilizatorii...",
@@ -996,7 +996,7 @@ adminUsers: {
 },
 accountSuspended: {
   title: "Cont suspendat",
-  description:    "Accesul la funcțiile platformei Auctino este momentan restricționat.",
+  description:    "Accesul la funcțiile platformei Vandivo este momentan restricționat.",
   reasonTitle: "Motivul suspendării",
   fallbackReason:    "Administratorul nu a furnizat un motiv suplimentar.",
   suspendedAt: "Suspendat la",
@@ -1026,7 +1026,7 @@ myProducts: {
   addProduct: "Adaugă produs",
   countLabel: "{count} produse publicate",
   emptyTitle: "Nu ai adăugat produse încă",
-  emptyDescription:   "Adaugă primul produs pentru a începe să vinzi pe Auctino.",
+  emptyDescription:   "Adaugă primul produs pentru a începe să vinzi pe Vandivo.",
   addFirstProduct: "Adaugă primul produs",
   loadingTitle: "Se încarcă produsele tale...",
   loadingDescription:    "Pregătim lista produselor pe care le-ai publicat.",
@@ -1051,15 +1051,15 @@ legal: {
   },
   terms: {
     eyebrow: "Termeni de utilizare",
-    title: "Termenii de utilizare Auctino",
+    title: "Termenii de utilizare Vandivo",
     description:
-      "Aceste reguli explică modul în care poți folosi Auctino ca marketplace de licitații online.",
+      "Aceste reguli explică modul în care poți folosi Vandivo ca marketplace de licitații online.",
     sections: [
       {
         title: "1. Rolul platformei",
         body: [
-          "Auctino este o platformă online care permite utilizatorilor să publice produse, să participe la licitații, să comunice și să gestioneze tranzacții.",
-          "Auctino facilitează interacțiunea dintre utilizatori, dar produsele, descrierile, prețurile și comunicarea aparțin utilizatorilor care le publică.",
+          "Vandivo este o platformă online care permite utilizatorilor să publice produse, să participe la licitații, să comunice și să gestioneze tranzacții.",
+          "Vandivo facilitează interacțiunea dintre utilizatori, dar produsele, descrierile, prețurile și comunicarea aparțin utilizatorilor care le publică.",
         ],
       },
       {
@@ -1087,20 +1087,20 @@ legal: {
         title: "5. Tranzacții și dispute",
         body: [
           "După încheierea unei licitații, cumpărătorul și vânzătorul trebuie să comunice clar și să finalizeze tranzacția cu bună credință.",
-          "Dacă apare o problemă, utilizatorii pot deschide o dispută. Auctino poate analiza situația și poate lua măsuri asupra conturilor sau produselor.",
+          "Dacă apare o problemă, utilizatorii pot deschide o dispută. Vandivo poate analiza situația și poate lua măsuri asupra conturilor sau produselor.",
         ],
       },
       {
         title: "6. Moderare și suspendare",
         body: [
-          "Auctino poate elimina produse, ascunde conținut, limita accesul sau suspenda conturi atunci când regulile platformei sunt încălcate.",
+          "Vandivo poate elimina produse, ascunde conținut, limita accesul sau suspenda conturi atunci când regulile platformei sunt încălcate.",
           "Măsurile pot fi aplicate pentru fraudă, abuz, comportament agresiv, raportări justificate sau activitate suspectă.",
         ],
       },
       {
         title: "7. Limitarea răspunderii",
         body: [
-          "Auctino depune eforturi pentru a oferi o experiență sigură, dar nu poate garanta fiecare produs, fiecare descriere sau comportamentul fiecărui utilizator.",
+          "Vandivo depune eforturi pentru a oferi o experiență sigură, dar nu poate garanta fiecare produs, fiecare descriere sau comportamentul fiecărui utilizator.",
           "Utilizatorii trebuie să verifice informațiile, să comunice prudent și să respecte legislația aplicabilă.",
         ],
       },
@@ -1108,7 +1108,7 @@ legal: {
   },
   privacy: {
     eyebrow: "Confidențialitate",
-    title: "Politica de confidențialitate Auctino",
+    title: "Politica de confidențialitate Vandivo",
     description:
       "Această pagină explică ce date folosim pentru funcționarea platformei și cum sunt protejate.",
     sections: [
@@ -1136,7 +1136,7 @@ legal: {
       {
         title: "4. Furnizori tehnici",
         body: [
-          "Auctino folosește servicii tehnice pentru autentificare, bază de date, stocare fișiere, hosting și livrarea aplicației.",
+          "Vandivo folosește servicii tehnice pentru autentificare, bază de date, stocare fișiere, hosting și livrarea aplicației.",
           "Acești furnizori sunt folosiți pentru funcționarea platformei și trebuie configurați astfel încât accesul la date să fie limitat și securizat.",
         ],
       },
@@ -1151,7 +1151,7 @@ legal: {
         title: "6. Securitate",
         body: [
           "Platforma folosește politici de acces la nivel de bază de date, autentificare și reguli de stocare pentru a limita accesul neautorizat.",
-          "Nicio platformă online nu poate garanta securitate absolută, dar Auctino tratează securitatea ca prioritate de produs.",
+          "Nicio platformă online nu poate garanta securitate absolută, dar Vandivo tratează securitatea ca prioritate de produs.",
         ],
       },
     ],
@@ -1172,7 +1172,7 @@ legal: {
       {
         title: "2. Comunică în platformă",
         body: [
-          "Folosește mesajele Auctino pentru întrebări importante despre produs, livrare, predare și starea reală a bunului.",
+          "Folosește mesajele Vandivo pentru întrebări importante despre produs, livrare, predare și starea reală a bunului.",
           "Păstrarea conversației în platformă ajută în cazul unei dispute sau raportări.",
         ],
       },
@@ -1187,7 +1187,7 @@ legal: {
         title: "4. Raportează problemele",
         body: [
           "Poți raporta produse care par false, interzise, periculoase, înșelătoare sau publicate cu informații incorecte.",
-          "Raportările ajută echipa Auctino să modereze platforma și să protejeze comunitatea.",
+          "Raportările ajută echipa Vandivo să modereze platforma și să protejeze comunitatea.",
         ],
       },
       {
@@ -1203,7 +1203,7 @@ legal: {
 contactPage: {
   backHome: "Înapoi acasă",
   eyebrow: "Contact și suport",
-  title: "Ai nevoie de ajutor cu Auctino?",
+  title: "Ai nevoie de ajutor cu Vandivo?",
   description:
     "Pentru întrebări despre cont, produse, raportări, dispute sau feedback pentru beta, ne poți contacta direct.",
   emailTitle: "Scrie-ne",
@@ -1221,7 +1221,7 @@ home: {
     titleStart: "Cumpără.",
     titleMiddle: "Vinde.",
     titleAccent: "Licitează.",
-    subtitle:      "Auctino este marketplace-ul unde fiecare produs își găsește următorul proprietar, simplu, rapid și cu mai multă încredere.",
+    subtitle:      "Vandivo este marketplace-ul unde fiecare produs își găsește următorul proprietar, simplu, rapid și cu mai multă încredere.",
     searchPlaceholder:      "Ce cauți astăzi? iPhone, ceasuri, biciclete...",
     searchButton: "Caută",
     primaryCta: "Explorează marketplace",
@@ -1267,14 +1267,14 @@ home: {
       },
     ],
     eyebrow: "Încredere înainte de tranzacție",
-      title: "Auctino este construit pentru licitații clare, nu pentru haos.",
+      title: "Vandivo este construit pentru licitații clare, nu pentru haos.",
       description:        "Fiecare detaliu important este vizibil: produs, vânzător, preț, timp rămas, ofertă și conversație.",
   },
 
   categories: {
   eyebrow: "Categorii",
   title: "Explorează după categorie",
-  description:    "Găsește rapid produse din cele mai căutate categorii de pe Auctino.",
+  description:    "Găsește rapid produse din cele mai căutate categorii de pe Vandivo.",
   viewAll: "Vezi toate categoriile",
   items: [
     {
@@ -1314,7 +1314,7 @@ home: {
 howItWorks: {
   eyebrow: "Cum funcționează",
   title: "Simplu pentru cumpărători și vânzători",
-  description:    "Auctino este construit ca fiecare pas important să fie clar, rapid și ușor de urmărit.",
+  description:    "Vandivo este construit ca fiecare pas important să fie clar, rapid și ușor de urmărit.",
   steps: [
     {
       title: "Publici sau descoperi produse",
@@ -1332,7 +1332,7 @@ howItWorks: {
 },
 
 whyAuctino: {
-  eyebrow: "De ce Auctino",
+  eyebrow: "De ce Vandivo",
   title: "Un marketplace construit pentru încredere",
   description:    "Nu vrem doar să listăm produse. Vrem să construim o experiență clară, sigură și modernă.",
   items: [
@@ -1350,14 +1350,14 @@ whyAuctino: {
     },
     {
       title: "Pregătit pentru scalare",
-      description:        "Auctino este construit pentru România, Franța și viitoare piețe europene.",
+      description:        "Vandivo este construit pentru România, Franța și viitoare piețe europene.",
     },
   ],
 },
 featuredAuctions: {
   eyebrow: "Licitații populare",
   title: "Produse urmărite și licitate chiar acum",
-  description:    "Descoperă licitațiile active care atrag cele mai multe oferte pe Auctino.",
+  description:    "Descoperă licitațiile active care atrag cele mai multe oferte pe Vandivo.",
   viewAll: "Vezi toate licitațiile",
   currentOffer: "Oferta curentă",
   bids: "oferte",
@@ -1368,7 +1368,7 @@ featuredAuctions: {
   noCategory: "Fără categorie",
   loading: "Se încarcă licitațiile...",
   emptyTitle: "Nu există licitații active încă",
-  emptyDescription:    "Adaugă primul produs și începe prima licitație pe Auctino.",
+  emptyDescription:    "Adaugă primul produs și începe prima licitație pe Vandivo.",
   sellProduct: "Vinde un produs",
   liveLabel: "Activă",
 auctionCardTrust:  "Preț, timp și ofertă vizibile înainte să licitezi.",
@@ -1377,14 +1377,14 @@ auctionCardTrust:  "Preț, timp și ofertă vizibile înainte să licitezi.",
 faq: {
   eyebrow: "Întrebări frecvente",
   title: "Ce trebuie să știi înainte să începi",
-  description:    "Am adunat cele mai importante întrebări pentru utilizatorii care descoperă Auctino pentru prima dată.",
+  description:    "Am adunat cele mai importante întrebări pentru utilizatorii care descoperă Vandivo pentru prima dată.",
   items: [
     {
-      question: "Ce este Auctino?",
-      answer:        "Auctino este un marketplace unde utilizatorii pot cumpăra, vinde și participa la licitații online.",
+      question: "Ce este Vandivo?",
+      answer:        "Vandivo este un marketplace unde utilizatorii pot cumpăra, vinde și participa la licitații online.",
     },
     {
-      question: "Pot vinde produse pe Auctino?",
+      question: "Pot vinde produse pe Vandivo?",
       answer:        "Da. După autentificare, poți publica un produs în câteva minute și îl poți lista la licitație.",
     },
     {
@@ -1399,7 +1399,7 @@ faq: {
 },
 
 finalCta: {
-  eyebrow: "Începe cu Auctino",
+  eyebrow: "Începe cu Vandivo",
   title: "Ai un produs de vândut sau cauți ceva special?",
   description:
     "Explorează licitațiile active sau publică primul tău produs în câteva minute.",
@@ -1700,14 +1700,14 @@ removeFromFavorites: "Elimină de la favorite",
 
 adminDashboard: {
   backHome: "Înapoi",
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Panou de administrare",
   description:    "Gestionează disputele, utilizatorii și raportările privind produsele din platformă.",
   loadingTitle: "Se încarcă panoul de administrare...",
   loadingDescription:    "Pregătim cele mai importante date pentru administrare.",
   accessDeniedEyebrow: "Acces interzis",
   accessDeniedTitle: "Nu ai drepturi de administrator",
-  accessDeniedDescription:    "Această pagină poate fi accesată numai de un administrator Auctino.",
+  accessDeniedDescription:    "Această pagină poate fi accesată numai de un administrator Vandivo.",
   authRequired: "Trebuie să fii autentificat.",
   loadError: "Panoul de administrare nu a putut fi încărcat.",
   retry: "Încearcă din nou",
@@ -1734,14 +1734,14 @@ adminDashboard: {
 },
 adminDisputes: {
   backToAdmin: "Înapoi la administrare",
-  eyebrow: "Administrare Auctino",
+  eyebrow: "Administrare Vandivo",
   title: "Dispute deschise",
   description:    "Verifică motivele raportate de utilizatori și decide dacă tranzacția trebuie finalizată sau anulată.",
   loadingTitle: "Se încarcă disputele...",
   loadingDescription:    "Pregătim tranzacțiile contestate care așteaptă verificarea administratorului.",
   accessDeniedEyebrow: "Acces interzis",
   accessDeniedTitle: "Nu ai drepturi de administrator",
-  accessDeniedDescription:    "Această pagină poate fi accesată numai de un administrator Auctino.",
+  accessDeniedDescription:    "Această pagină poate fi accesată numai de un administrator Vandivo.",
   backHome: "Înapoi la pagina principală",
   authRequired: "Trebuie să fii autentificat.",
   loadError: "Disputele nu au putut fi încărcate.",

@@ -1,12 +1,12 @@
-# Auctino Deployment Runbook
+# Vandivo Deployment Runbook
 
 ## Goal
 
-Prepare Auctino for beta deployment with a safe, repeatable process.
+Prepare Vandivo for beta deployment with a safe, repeatable process.
 
 ## Production domain
 
 Primary domain:
 
 ```txt
-https://auctino.ro
+https://vandivo.ro

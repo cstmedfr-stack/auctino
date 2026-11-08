@@ -34,7 +34,7 @@ export default function LegalInformationPage() {
           </div>
 
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-indigo-700">
-            Auctino
+            Vandivo
           </p>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
@@ -45,8 +45,8 @@ export default function LegalInformationPage() {
 
           <p className="mt-4 text-base leading-7 text-slate-600">
             {isFr
-              ? "Informations relatives à la société exploitant et administrant la plateforme Auctino."
-              : "Informații privind societatea care operează și administrează platforma Auctino."}
+              ? "Informations relatives à la société exploitant et administrant la plateforme Vandivo."
+              : "Informații privind societatea care operează și administrează platforma Vandivo."}
           </p>
 
           <section className="mt-9 border-t border-slate-200 pt-8">
@@ -113,7 +113,7 @@ export default function LegalInformationPage() {
                     ? "Plateforme exploitée"
                     : "Platformă administrată"
                 }
-                value="Auctino"
+                value="Vandivo"
               />
             </div>
 
@@ -123,11 +123,11 @@ export default function LegalInformationPage() {
               </p>
 
               <a
-                href="mailto:contact@auctino.ro"
+                href="mailto:contact@vandivo.ro"
                 className="mt-2 inline-flex items-center gap-2 font-medium text-indigo-700 hover:underline"
               >
                 <Mail size={17} />
-                contact@auctino.ro
+                contact@vandivo.ro
               </a>
             </div>
           </section>
@@ -141,8 +141,8 @@ export default function LegalInformationPage() {
 
             <p className="mt-3 text-sm leading-7 text-slate-700">
               {isFr
-                ? "Auctino est une plateforme numérique de petites annonces et d'enchères entre utilisateurs, exploitée par CST FAMILY HOME SRL. La société fournit les fonctionnalités techniques nécessaires à la publication d'annonces, aux enchères et aux échanges entre utilisateurs."
-                : "Auctino este o platformă digitală de anunțuri și licitații între utilizatori, operată de CST FAMILY HOME SRL. Societatea pune la dispoziție funcționalitățile tehnice necesare publicării anunțurilor, desfășurării licitațiilor și comunicării dintre utilizatori."}
+                ? "Vandivo est une plateforme numérique de petites annonces et d'enchères entre utilisateurs, exploitée par CST FAMILY HOME SRL. La société fournit les fonctionnalités techniques nécessaires à la publication d'annonces, aux enchères et aux échanges entre utilisateurs."
+                : "Vandivo este o platformă digitală de anunțuri și licitații între utilizatori, operată de CST FAMILY HOME SRL. Societatea pune la dispoziție funcționalitățile tehnice necesare publicării anunțurilor, desfășurării licitațiilor și comunicării dintre utilizatori."}
             </p>
 
             <p className="mt-3 text-sm leading-7 text-slate-700">

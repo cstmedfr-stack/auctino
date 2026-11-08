@@ -1,28 +1,27 @@
-# Auctino Brand Checklist
+# Vandivo Brand Checklist
 
 ## Brand name
 
 Primary brand name:
 
-Auctino
-
+Vandivo
 ## Domains
 
 Primary Romania domain:
 
-https://auctino.ro
+https://vandivo.ro
 
 Future France domain:
 
-https://auctino.fr
+https://vandivo.fr
 
 Protective global domain:
 
-https://auctino.com
+https://vandivo.com
 
 ## Product positioning
 
-Auctino is a modern auction marketplace for trusted online buying and selling.
+Vandivo is a modern auction marketplace for trusted online buying and selling.
 
 ## Voice
 
@@ -51,10 +50,10 @@ Auctino is a modern auction marketplace for trusted online buying and selling.
 
 Use:
 
-- Auctino
-- auctino.ro
-- auctino.fr
-- auctino.com
+- Vandivo
+- vandivo.ro
+- vandivo.fr
+- vandivo.com
 
 Do not use:
 

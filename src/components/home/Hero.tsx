@@ -33,13 +33,13 @@ export function Hero() {
   const suggestionText =
     locale === "fr"
       ? {
-          title: "Construisons Auctino ensemble !",
+          title: "Construisons Vandivo ensemble !",
           description:
             "Vous avez une idée, une suggestion ou une nouvelle catégorie à proposer ?",
           button: "Partagez votre idée",
         }
       : {
-          title: "Construim Auctino împreună!",
+          title: "Construim Vandivo împreună!",
           description:
             "Ai o idee, o sugestie sau o categorie nouă pe care ai vrea să o găsești?",
           button: "Trimite o sugestie",
@@ -212,7 +212,7 @@ export function Hero() {
           </div>
 
           <div className="mt-1 text-sm text-indigo-600">
-            Auctino
+            Vandivo
           </div>
         </div>
 
@@ -229,7 +229,7 @@ export function Hero() {
               </div>
 
               <div className="text-xs text-slate-500">
-                Auctino
+                Vandivo
               </div>
             </div>
           </div>

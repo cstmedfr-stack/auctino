@@ -1,12 +1,12 @@
-# Auctino Product Vision
+# Vandivo Product Vision
 
 ## Mission
 
-Auctino construiește un marketplace modern unde oamenii pot cumpăra, vinde și participa la licitații într-un mediu sigur, transparent și ușor de folosit.
+Vandivo construiește un marketplace modern unde oamenii pot cumpăra, vinde și participa la licitații într-un mediu sigur, transparent și ușor de folosit.
 
 ## Vision
 
-Auctino își propune să devină o platformă europeană de referință pentru marketplace și licitații online, începând cu România și Franța.
+Vandivo își propune să devină o platformă europeană de referință pentru marketplace și licitații online, începând cu România și Franța.
 
 ## Core Values
 

@@ -1,4 +1,4 @@
-# Auctino Roadmap
+# Vandivo Roadmap
 
 ## Faza 1 — Beta România
 

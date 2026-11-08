@@ -78,7 +78,7 @@ const translations = {
     back: "Înapoi la administrare",
     title: "Sugestiile utilizatorilor",
     subtitle:
-      "Idei, propuneri și probleme semnalate de comunitatea Auctino.",
+      "Idei, propuneri și probleme semnalate de comunitatea Vandivo.",
     newSuggestions: "Sugestii noi",
     filteredTotal: "Rezultate",
     allCategories: "Toate categoriile",
@@ -117,7 +117,7 @@ const translations = {
     back: "Retour à l'administration",
     title: "Suggestions des utilisateurs",
     subtitle:
-      "Idées, propositions et problèmes signalés par la communauté Auctino.",
+      "Idées, propositions et problèmes signalés par la communauté Vandivo.",
     newSuggestions: "Nouvelles suggestions",
     filteredTotal: "Résultats",
     allCategories: "Toutes les catégories",

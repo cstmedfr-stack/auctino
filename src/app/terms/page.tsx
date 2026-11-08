@@ -21,12 +21,12 @@ export default function TermsPage() {
     body:
       locale === "fr"
         ? [
-            "La plateforme Auctino est exploitée et administrée par CST FAMILY HOME SRL, société établie en Roumanie.",
+            "La plateforme Vandivo est exploitée et administrée par CST FAMILY HOME SRL, société établie en Roumanie.",
             "CST FAMILY HOME SRL met à disposition une plateforme numérique permettant aux utilisateurs de publier des produits, de participer à des enchères et de communiquer dans le cadre de transactions.",
             "Sauf indication contraire explicite, CST FAMILY HOME SRL n'est pas le vendeur des produits publiés par les utilisateurs. Les transactions portant sur ces produits sont conclues entre les parties concernées, conformément à la législation applicable.",
           ]
         : [
-            "Platforma Auctino este operată și administrată de CST FAMILY HOME SRL, societate înregistrată în România.",
+            "Platforma Vandivo este operată și administrată de CST FAMILY HOME SRL, societate înregistrată în România.",
             "CST FAMILY HOME SRL pune la dispoziție o platformă digitală prin intermediul căreia utilizatorii pot publica produse, participa la licitații și comunica pentru realizarea tranzacțiilor.",
             "Cu excepția situațiilor indicate explicit, CST FAMILY HOME SRL nu este vânzătorul produselor publicate de utilizatori. Tranzacțiile privind aceste produse se încheie între părțile implicate, în condițiile legislației aplicabile.",
           ],

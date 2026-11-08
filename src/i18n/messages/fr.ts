@@ -63,7 +63,7 @@ removeSavedProduct: "Retirer le produit des favoris",
 soldBy: "Vendu par",
 viewProfile: "Voir le profil",
 sellerAvatar: "Image du vendeur",
-defaultSellerName: "Utilisateur Auctino",
+defaultSellerName: "Utilisateur Vandivo",
 trust: "Confiance",
 rating: "Note",
 sellerBadge: "Badge vendeur",
@@ -270,8 +270,8 @@ publicProfile: {
   noProductsTitle:    "Cet utilisateur n’a pas de produits actifs.",
   noProductsDescription:    "Revenez plus tard pour voir s’il publie de nouvelles enchères.",
   sellerProfile: "Profil vendeur",
-defaultUserName: "Utilisateur Auctino",
-activeSeller: "Membre Auctino • vendeur actif",
+defaultUserName: "Utilisateur Vandivo",
+activeSeller: "Membre Vandivo • vendeur actif",
 locationLabel: "Localisation",
 trustScore: "Trust Score",
 rating: "Note",
@@ -320,12 +320,12 @@ trustScoreLabels: {
   },
 },
 
-badgeLabels: {  trustedSellerElite: {    title: "Trusted Seller Elite",    description:      "Vendeur avec une excellente réputation sur Auctino.",  },
+badgeLabels: {  trustedSellerElite: {    title: "Trusted Seller Elite",    description:      "Vendeur avec une excellente réputation sur Vandivo.",  },
   trustedSeller: {    title: "Trusted Seller",    description:      "Utilisateur avec un haut niveau de confiance.",  },
   activeSeller: {    title: "Vendeur actif",    description:      "A vendu au moins 10 produits.",  },
   auctionWinner: {    title: "Enchères gagnées",    description:      "A gagné au moins 5 enchères.",  },
   topRated: {    title: "Top Rated",    description:      "Dispose d’une très bonne note issue des avis.",  },
-  newMember: {    title: "Nouveau membre",    description:      "Fait ses premiers pas sur Auctino.",  },
+  newMember: {    title: "Nouveau membre",    description:      "Fait ses premiers pas sur Vandivo.",  },
 },
 },
 
@@ -341,7 +341,7 @@ chat: {
   noMessagesPreview: "Aucune conversation pour le moment",
   youPrefix: "Vous : ",
   unreadLabel: "Message non lu",
-  selectTitle: "Chat Auctino",
+  selectTitle: "Chat Vandivo",
   selectDescription:    "Sélectionnez une conversation dans la liste pour continuer l’échange.",
   loadingChat: "Chargement du chat...",
   chatTitle: "Conversation",
@@ -454,7 +454,7 @@ auth: {
   login: {
     eyebrow: "Connexion",
     title: "Connectez-vous",
-    description:      "Accédez à votre compte Auctino pour enchérir, vendre et gérer vos produits enregistrés.",
+    description:      "Accédez à votre compte Vandivo pour enchérir, vendre et gérer vos produits enregistrés.",
     emailLabel: "Email",
     emailPlaceholder: "nom@email.com",
     passwordLabel: "Mot de passe",
@@ -485,7 +485,7 @@ auth: {
   },
   shell: {
     trustTitle: "Marketplace sécurisé pour des enchères modernes",
-    trustDescription:      "Auctino combine enchères, profils publics, messagerie, transactions et notifications dans une expérience simple et fiable.",
+    trustDescription:      "Vandivo combine enchères, profils publics, messagerie, transactions et notifications dans une expérience simple et fiable.",
     benefitOne: "Produits validés par la communauté",
     benefitTwo: "Conversations et transactions au même endroit",
     benefitThree: "Expérience optimisée pour acheteurs et vendeurs",
@@ -516,7 +516,7 @@ accountProfile: {
   overview: {
     eyebrow: "Mon compte",
     title: "Profil et réputation",
-    description:      "Gérez les informations du compte, la réputation, les vérifications et votre activité sur Auctino.",
+    description:      "Gérez les informations du compte, la réputation, les vérifications et votre activité sur Vandivo.",
     editProfile: "Modifier le profil",
     publicProfile: "Voir le profil public",
     loadingTitle: "Chargement du profil...",
@@ -658,7 +658,7 @@ reviewsTrust: {
   starLabelSingular: "1 étoile",
 },
 adminReports: {
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Produits signalés",
   description:    "Examinez les signalements envoyés par les utilisateurs et décidez si le produit reste actif ou doit être supprimé.",
   backToAdmin: "Retour à l’administration",
@@ -780,7 +780,7 @@ receivedBidsPage: {
 },
 
 categoriesPage: {
-  eyebrow: "Auctino",
+  eyebrow: "Vandivo",
   title: "Explorer les catégories",
   description:    "Découvrez rapidement les produits et les enchères qui vous intéressent.",
   loadingTitle: "Chargement des catégories...",
@@ -844,7 +844,7 @@ navbar: {
   adminPanel: "Panneau d’administration",
   profileSettings: "Paramètres du profil",
 
-  defaultUser: "Utilisateur Auctino",
+  defaultUser: "Utilisateur Vandivo",
   profileImage: "Photo de profil",
 },
 
@@ -884,7 +884,7 @@ registerError:  "L’image n’a pas pu être enregistrée.",
 
 adminUsers: {
   backToAdmin: "Retour à l’administration",
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Gestion des utilisateurs",
   description:    "Recherchez des utilisateurs et gérez la suspension ou la réactivation des comptes.",
   loadingTitle: "Chargement des utilisateurs...",
@@ -954,7 +954,7 @@ adminUsers: {
 },
 accountSuspended: {
   title: "Compte suspendu",
-  description:    "L’accès aux fonctionnalités de la plateforme Auctino est actuellement restreint.",
+  description:    "L’accès aux fonctionnalités de la plateforme Vandivo est actuellement restreint.",
   reasonTitle: "Motif de la suspension",
   fallbackReason:    "L’administrateur n’a pas fourni de motif supplémentaire.",
   suspendedAt: "Suspendu le",
@@ -983,7 +983,7 @@ myProducts: {
   addProduct: "Publier un produit",
   countLabel: "{count} produits publiés",
   emptyTitle: "Vous n’avez pas encore publié de produit",
-  emptyDescription:    "Publiez votre premier produit pour commencer à vendre sur Auctino.",
+  emptyDescription:    "Publiez votre premier produit pour commencer à vendre sur Vandivo.",
   addFirstProduct: "Publier le premier produit",
   loadingTitle: "Chargement de vos produits...",
   loadingDescription:    "Nous préparons la liste des produits que vous avez publiés.",
@@ -1001,7 +1001,7 @@ deleteSuccess: "Le produit a été supprimé.",
 
 },
 marketplace: {
-  heroEyebrow: "Marketplace Auctino",
+  heroEyebrow: "Marketplace Vandivo",
   heroTitle: "Votre marketplace d’enchères",
   heroDescription:    "Publiez des produits, suivez des enchères et découvrez des offres actives au même endroit.",
   addProduct: "Publier un produit",
@@ -1054,15 +1054,15 @@ legal: {
   },
   terms: {
     eyebrow: "Conditions d’utilisation",
-    title: "Conditions d’utilisation Auctino",
+    title: "Conditions d’utilisation Vandivo",
     description:
-      "Ces règles expliquent comment utiliser Auctino comme marketplace d’enchères en ligne.",
+      "Ces règles expliquent comment utiliser Vandivo comme marketplace d’enchères en ligne.",
     sections: [
       {
         title: "1. Rôle de la plateforme",
         body: [
-          "Auctino est une plateforme en ligne qui permet aux utilisateurs de publier des produits, participer à des enchères, communiquer et gérer des transactions.",
-          "Auctino facilite l’interaction entre utilisateurs, mais les produits, descriptions, prix et échanges appartiennent aux utilisateurs qui les publient.",
+          "Vandivo est une plateforme en ligne qui permet aux utilisateurs de publier des produits, participer à des enchères, communiquer et gérer des transactions.",
+          "Vandivo facilite l’interaction entre utilisateurs, mais les produits, descriptions, prix et échanges appartiennent aux utilisateurs qui les publient.",
         ],
       },
       {
@@ -1090,20 +1090,20 @@ legal: {
         title: "5. Transactions et litiges",
         body: [
           "Après la fin d’une enchère, l’acheteur et le vendeur doivent communiquer clairement et finaliser la transaction de bonne foi.",
-          "En cas de problème, les utilisateurs peuvent ouvrir un litige. Auctino peut analyser la situation et prendre des mesures concernant les comptes ou produits.",
+          "En cas de problème, les utilisateurs peuvent ouvrir un litige. Vandivo peut analyser la situation et prendre des mesures concernant les comptes ou produits.",
         ],
       },
       {
         title: "6. Modération et suspension",
         body: [
-          "Auctino peut supprimer des produits, masquer du contenu, limiter l’accès ou suspendre des comptes lorsque les règles de la plateforme sont enfreintes.",
+          "Vandivo peut supprimer des produits, masquer du contenu, limiter l’accès ou suspendre des comptes lorsque les règles de la plateforme sont enfreintes.",
           "Des mesures peuvent être appliquées en cas de fraude, abus, comportement agressif, signalements justifiés ou activité suspecte.",
         ],
       },
       {
         title: "7. Limitation de responsabilité",
         body: [
-          "Auctino fait des efforts pour offrir une expérience sûre, mais ne peut pas garantir chaque produit, chaque description ou le comportement de chaque utilisateur.",
+          "Vandivo fait des efforts pour offrir une expérience sûre, mais ne peut pas garantir chaque produit, chaque description ou le comportement de chaque utilisateur.",
           "Les utilisateurs doivent vérifier les informations, communiquer prudemment et respecter la législation applicable.",
         ],
       },
@@ -1111,7 +1111,7 @@ legal: {
   },
   privacy: {
     eyebrow: "Confidentialité",
-    title: "Politique de confidentialité Auctino",
+    title: "Politique de confidentialité Vandivo",
     description:
       "Cette page explique quelles données sont utilisées pour le fonctionnement de la plateforme et comment elles sont protégées.",
     sections: [
@@ -1139,7 +1139,7 @@ legal: {
       {
         title: "4. Prestataires techniques",
         body: [
-          "Auctino utilise des services techniques pour l’authentification, la base de données, le stockage de fichiers, l’hébergement et la livraison de l’application.",
+          "Vandivo utilise des services techniques pour l’authentification, la base de données, le stockage de fichiers, l’hébergement et la livraison de l’application.",
           "Ces prestataires sont utilisés pour le fonctionnement de la plateforme et doivent être configurés afin de limiter et sécuriser l’accès aux données.",
         ],
       },
@@ -1154,7 +1154,7 @@ legal: {
         title: "6. Sécurité",
         body: [
           "La plateforme utilise des politiques d’accès au niveau de la base de données, l’authentification et des règles de stockage pour limiter les accès non autorisés.",
-          "Aucune plateforme en ligne ne peut garantir une sécurité absolue, mais Auctino traite la sécurité comme une priorité produit.",
+          "Aucune plateforme en ligne ne peut garantir une sécurité absolue, mais Vandivo traite la sécurité comme une priorité produit.",
         ],
       },
     ],
@@ -1175,7 +1175,7 @@ legal: {
       {
         title: "2. Communiquez sur la plateforme",
         body: [
-          "Utilisez les messages Auctino pour les questions importantes concernant le produit, la livraison, la remise et l’état réel du bien.",
+          "Utilisez les messages Vandivo pour les questions importantes concernant le produit, la livraison, la remise et l’état réel du bien.",
           "Conserver la conversation sur la plateforme aide en cas de litige ou de signalement.",
         ],
       },
@@ -1190,7 +1190,7 @@ legal: {
         title: "4. Signalez les problèmes",
         body: [
           "Vous pouvez signaler les produits qui semblent faux, interdits, dangereux, trompeurs ou publiés avec des informations incorrectes.",
-          "Les signalements aident l’équipe Auctino à modérer la plateforme et à protéger la communauté.",
+          "Les signalements aident l’équipe Vandivo à modérer la plateforme et à protéger la communauté.",
         ],
       },
       {
@@ -1206,7 +1206,7 @@ legal: {
 contactPage: {
   backHome: "Retour à l’accueil",
   eyebrow: "Contact et support",
-  title: "Besoin d’aide avec Auctino ?",
+  title: "Besoin d’aide avec Vandivo ?",
   description:    "Pour les questions concernant le compte, les produits, les signalements, les litiges ou les retours beta, vous pouvez nous contacter directement.",
   emailTitle: "Écrivez-nous",
   emailDescription:    "Envoyez-nous un message avec des détails clairs. Pour les signalements ou litiges, incluez le produit, l’utilisateur concerné et le contexte du problème.",
@@ -1221,7 +1221,7 @@ home: {
     titleMiddle: "Vendez.",
     titleAccent: "Enchérissez.",
     subtitle:
-      "Auctino est le marketplace où chaque produit trouve son prochain propriétaire, simplement, rapidement et avec plus de confiance.",
+      "Vandivo est le marketplace où chaque produit trouve son prochain propriétaire, simplement, rapidement et avec plus de confiance.",
     searchPlaceholder:
       "Que recherchez-vous aujourd’hui ? iPhone, montres, vélos...",
     searchButton: "Rechercher",
@@ -1271,7 +1271,7 @@ chatDescription:  "Des échanges directs entre acheteur et vendeur",
       },
     ],
     eyebrow: "La confiance avant la transaction",
-title: "Auctino est conçu pour des enchères claires, pas pour le chaos.",
+title: "Vandivo est conçu pour des enchères claires, pas pour le chaos.",
 description:  "Chaque détail important est visible : produit, vendeur, prix, temps restant, offre et conversation.",
   },
 
@@ -1280,7 +1280,7 @@ categories: {
   eyebrow: "Catégories",
   title: "Explorer par catégorie",
   description:
-    "Trouvez rapidement des produits dans les catégories les plus recherchées sur Auctino.",
+    "Trouvez rapidement des produits dans les catégories les plus recherchées sur Vandivo.",
   viewAll: "Voir toutes les catégories",
   items: [
     {
@@ -1323,7 +1323,7 @@ howItWorks: {
   eyebrow: "Comment ça marche",
   title: "Simple pour les acheteurs et les vendeurs",
   description:
-    "Auctino est conçu pour rendre chaque étape importante claire, rapide et facile à suivre.",
+    "Vandivo est conçu pour rendre chaque étape importante claire, rapide et facile à suivre.",
   steps: [
     {
       title: "Publiez ou découvrez des produits",
@@ -1344,7 +1344,7 @@ howItWorks: {
 },
 
 whyAuctino: {
-  eyebrow: "Pourquoi Auctino",
+  eyebrow: "Pourquoi Vandivo",
   title: "Un marketplace construit pour la confiance",
   description:
     "Nous ne voulons pas seulement lister des produits. Nous voulons créer une expérience claire, sûre et moderne.",
@@ -1367,14 +1367,14 @@ whyAuctino: {
     {
       title: "Prêt pour la croissance",
       description:
-        "Auctino est construit pour la Roumanie, la France et de futurs marchés européens.",
+        "Vandivo est construit pour la Roumanie, la France et de futurs marchés européens.",
     },
   ],
 },
 featuredAuctions: {
   eyebrow: "Enchères populaires",
   title: "Produits suivis et enchéris en ce moment",
-  description:    "Découvrez les enchères actives qui attirent le plus d’offres sur Auctino.",
+  description:    "Découvrez les enchères actives qui attirent le plus d’offres sur Vandivo.",
   viewAll: "Voir toutes les enchères",
   currentOffer: "Offre actuelle",
   bids: "offres",
@@ -1385,7 +1385,7 @@ featuredAuctions: {
   noCategory: "Aucune catégorie",
   loading: "Chargement des enchères...",
   emptyTitle: "Aucune enchère active pour le moment",
-  emptyDescription:    "Publiez le premier produit et lancez la première enchère sur Auctino.",
+  emptyDescription:    "Publiez le premier produit et lancez la première enchère sur Vandivo.",
   sellProduct: "Vendre un produit",
   liveLabel: "Active",
 auctionCardTrust:  "Prix, temps et offre visibles avant d’enchérir.",
@@ -1395,15 +1395,15 @@ faq: {
   eyebrow: "Questions fréquentes",
   title: "Ce qu’il faut savoir avant de commencer",
   description:
-    "Nous avons rassemblé les questions les plus importantes pour les utilisateurs qui découvrent Auctino.",
+    "Nous avons rassemblé les questions les plus importantes pour les utilisateurs qui découvrent Vandivo.",
   items: [
     {
-      question: "Qu’est-ce qu’Auctino ?",
+      question: "Qu’est-ce que Vandivo ?",
       answer:
-        "Auctino est un marketplace où les utilisateurs peuvent acheter, vendre et participer à des enchères en ligne.",
+        "Vandivo est un marketplace où les utilisateurs peuvent acheter, vendre et participer à des enchères en ligne.",
     },
     {
-      question: "Puis-je vendre des produits sur Auctino ?",
+      question: "Puis-je vendre des produits sur Vandivo ?",
       answer:
         "Oui. Après connexion, vous pouvez publier un produit en quelques minutes et le proposer aux enchères.",
     },
@@ -1421,7 +1421,7 @@ faq: {
 },
 
 finalCta: {
-  eyebrow: "Commencer avec Auctino",
+  eyebrow: "Commencer avec Vandivo",
   title: "Vous avez un produit à vendre ou vous cherchez quelque chose de spécial ?",
   description:
     "Explorez les enchères actives ou publiez votre premier produit en quelques minutes.",
@@ -1708,7 +1708,7 @@ removeFromFavorites: "Retirer des favoris",
 
 adminDashboard: {
   backHome: "Retour",
-  eyebrow: "Auctino Admin",
+  eyebrow: "Vandivo Admin",
   title: "Panneau d’administration",
   description:    "Gérez les litiges, les utilisateurs et les signalements de produits de la plateforme.",
   loadingTitle: "Chargement du panneau d’administration...",
@@ -1716,7 +1716,7 @@ adminDashboard: {
     "Nous préparons les informations importantes pour l’administration.",
   accessDeniedEyebrow: "Accès refusé",
   accessDeniedTitle:    "Vous n’avez pas les droits administrateur",
-  accessDeniedDescription:    "Cette page est réservée aux administrateurs Auctino.",
+  accessDeniedDescription:    "Cette page est réservée aux administrateurs Vandivo.",
   authRequired: "Vous devez être connecté.",
   loadError:    "Le panneau d’administration n’a pas pu être chargé.",
   retry: "Réessayer",
@@ -1743,14 +1743,14 @@ adminDashboard: {
 },
 adminDisputes: {
   backToAdmin: "Retour à l’administration",
-  eyebrow: "Administration Auctino",
+  eyebrow: "Administration Vandivo",
   title: "Litiges ouverts",
   description:    "Examinez les motifs signalés par les utilisateurs et décidez si la transaction doit être finalisée ou annulée.",
   loadingTitle: "Chargement des litiges...",
   loadingDescription:    "Nous préparons les transactions contestées en attente de vérification.",
   accessDeniedEyebrow: "Accès refusé",
   accessDeniedTitle:    "Vous n’avez pas les droits administrateur",
-  accessDeniedDescription:    "Cette page est réservée aux administrateurs Auctino.",
+  accessDeniedDescription:    "Cette page est réservée aux administrateurs Vandivo.",
   backHome: "Retour à l’accueil",
   authRequired: "Vous devez être connecté.",
   loadError: "Les litiges n’ont pas pu être chargés.",

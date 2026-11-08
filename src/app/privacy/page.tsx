@@ -21,14 +21,14 @@ export default function PrivacyPage() {
     body:
       locale === "fr"
         ? [
-            "CST FAMILY HOME SRL, société établie en Roumanie et exploitant la plateforme Auctino, est responsable du traitement des données personnelles effectué pour le fonctionnement de la plateforme lorsqu'elle en détermine les finalités et les moyens.",
+            "CST FAMILY HOME SRL, société établie en Roumanie et exploitant la plateforme Vandivo, est responsable du traitement des données personnelles effectué pour le fonctionnement de la plateforme lorsqu'elle en détermine les finalités et les moyens.",
             "Ces traitements concernent notamment la création et la gestion des comptes, les annonces, les enchères, la messagerie, les notifications, les transactions, la sécurité et l'assistance aux utilisateurs.",
-            "Pour toute question concernant vos données personnelles ou l'exercice de vos droits, vous pouvez contacter l'exploitant via la page Contact d'Auctino.",
+            "Pour toute question concernant vos données personnelles ou l'exercice de vos droits, vous pouvez contacter l'exploitant via la page Contact de Vandivo.",
           ]
         : [
-            "CST FAMILY HOME SRL, societate înregistrată în România și operator al platformei Auctino, este operatorul datelor cu caracter personal prelucrate pentru funcționarea platformei, în măsura în care stabilește scopurile și mijloacele prelucrării.",
+            "CST FAMILY HOME SRL, societate înregistrată în România și operator al platformei Vandivo, este operatorul datelor cu caracter personal prelucrate pentru funcționarea platformei, în măsura în care stabilește scopurile și mijloacele prelucrării.",
             "Aceste prelucrări privesc, între altele, crearea și administrarea conturilor, anunțurile, licitațiile, mesageria, notificările, tranzacțiile, securitatea și asistența acordată utilizatorilor.",
-            "Pentru întrebări referitoare la datele personale sau pentru exercitarea drepturilor prevăzute de legislația aplicabilă, poți contacta operatorul prin pagina Contact a platformei Auctino.",
+            "Pentru întrebări referitoare la datele personale sau pentru exercitarea drepturilor prevăzute de legislația aplicabilă, poți contacta operatorul prin pagina Contact a platformei Vandivo.",
           ],
   };
 

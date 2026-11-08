@@ -1,8 +1,8 @@
-# Auctino Supabase Security Audit
+# Vandivo Supabase Security Audit
 
 ## Goal
 
-Validate that Auctino can safely accept real users during beta.
+Validate that Vandivo can safely accept real users during beta.
 
 Client-side checks are not security. Supabase RLS policies, storage policies and secure RPC functions must enforce the real rules.
 

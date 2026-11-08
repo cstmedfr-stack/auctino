@@ -1,19 +1,19 @@
-# Auctino Pre-launch QA
+# Vandivo Pre-launch QA
 
 ## Goal
 
-Validate that Auctino is ready for a controlled beta launch in Romania.
+Validate that Vandivo is ready for a controlled beta launch in Romania.
 
 ## Brand consistency
 
-- Auctino name is used everywhere in UI
+- Vandivo name is used everywhere in UI
 - No old project name references remain in UI.
-- Metadata uses Auctino
-- Footer uses Auctino
-- Loading pages use Auctino
-- Local storage keys use auctino
-- Domain references use auctino.ro
-- Future France domain is documented as auctino.fr
+- Metadata uses Vandivo
+- Footer uses Vandivo
+- Loading pages use Vandivo
+- Local storage keys use vandivo
+- Domain references use vandivo.ro
+- Future France domain is documented as vandivo.fr
 
 ## Public pages
 

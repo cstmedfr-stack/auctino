@@ -147,7 +147,7 @@ export default function AccountNavigation({
           className="mb-2"
         />
         <p className="text-xs leading-5">
-          Auctino
+          Vandivo
         </p>
       </div>
     </aside>

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useMessages } from "@/i18n/useMessages";
 
-const CONTACT_EMAIL = "contact@auctino.ro";
+const CONTACT_EMAIL = "contact@vandivo.ro";
 
 export default function ContactPage() {
   const messages = useMessages();

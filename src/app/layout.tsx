@@ -12,19 +12,19 @@ import { LocaleProvider } from "@/i18n/LocaleProvider";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://auctino.ro";
+  "https://vandivo.ro";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Auctino",
-    template: "%s | Auctino",
+    default: "Vandivo",
+    template: "%s | Vandivo",
   },
   description:
-    "Auctino is a modern online auction marketplace for buying and selling products through trusted bidding.",
-  applicationName: "Auctino",
+    "Vandivo is a modern online auction marketplace for buying and selling products through trusted bidding.",
+  applicationName: "Vandivo",
   keywords: [
-    "Auctino",
+    "Vandivo",
     "online auctions",
     "auction marketplace",
     "second-hand marketplace",
@@ -34,24 +34,24 @@ export const metadata: Metadata = {
   ],
   authors: [
     {
-      name: "Auctino",
+      name: "Vandivo",
     },
   ],
-  creator: "Auctino",
-  publisher: "Auctino",
+  creator: "Vandivo",
+  publisher: "Vandivo",
   alternates: {
     canonical: siteUrl,
     languages: {
-      ro: "https://auctino.ro",
-      fr: "https://auctino.fr",
-      "x-default": "https://auctino.ro",
+      ro: "https://vandivo.ro",
+      fr: "https://vandivo.fr",
+      "x-default": "https://vandivo.ro",
     },
   },
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: "Auctino",
-    title: "Auctino",
+    siteName: "Vandivo",
+    title: "Vandivo",
     description:
       "A modern online auction marketplace for trusted buying and selling.",
     locale: "ro_RO",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Auctino",
+    title: "Vandivo",
     description:
       "A modern online auction marketplace for trusted buying and selling.",
   },

@@ -72,7 +72,7 @@
 - Replaced NotificationBell emoji with Lucide icon.
 - Replaced Navbar emoji with Lucide icons.
 - Improved Navbar buttons, profile menu and action states.
-- Improved visual consistency with Auctino Design Language.
+- Improved visual consistency with Vandivo Design Language.
 - Finalized Footer i18n integration using dedicated footer messages.
 
 ## Batch 8 - Marketplace Dashboard Premium Polish
@@ -480,7 +480,7 @@
 
 ## Batch 26 - Categories + Legacy Pages + Remaining Alerts Cleanup
 
-- Rebuilt /categories with localized premium UI and Lucide icons.
+- Rebuilt /categories with localizeo d premium UI and Lucide icons.
 - Replaced /licitatii placeholder with redirect to marketplace dashboard.
 - Removed window.confirm and alert usage from My Products actions.
 - Rebuilt RelistProductPanel with inline localized confirmation.
@@ -501,7 +501,7 @@
 
 ## Batch 29 - Production Readiness
 
-- Updated global metadata for the Auctino brand.
+- Updated global metadata for the Auctinbrand.
 - Added metadataBase, Open Graph, Twitter and canonical configuration.
 - Added robots.txt and sitemap.xml generation.
 - Added premium localized 404 and error pages.
@@ -509,13 +509,13 @@
 - Added production redirects for legacy routes.
 - Updated Next.js config for production headers and avatar storage images.
 - Added production launch checklist.
-- Prepared domain strategy for auctino.ro, auctino.fr and auctino.com.
+- Prepared domain strategy for vandivo.ro, vandivo.fr and vandivo.com.
 
 
 ## Batch 30 - Pre-launch QA + Brand Consistency
 
 - Added pre-launch QA checklist for public, auth, seller, buyer, transaction, chat, notification and admin flows.
-- Added Auctino brand checklist with domain strategy and naming rules.
+- Added Vandivo brand checklist with domain strategy and naming rules.
 - Defined final launch blocker rules.
 - Added brand consistency audit steps for replacing old project name references.
 
@@ -586,4 +586,13 @@ Batch 37A – ESLint / React Hooks Compatibility Cleanup: FINALIZAT
 npm run i18n:audit: PASS
 npm run lint: PASS, 0 errors, 21 warnings
 npm run build: PASS
-Brand: Auctino
+Brand: Vandivo
+
+## Batch 37 - Vercel Deploy
+
+- Pushed Vandivo beta candidate to GitHub.
+- Imported the project into Vercel.
+- Configured production environment variables.
+- Fixed Supabase publishable key variable for Vercel build.
+- Deployed Vandivo successfully on a temporary Vercel URL.
+- Verified main public and auth routes on Vercel.

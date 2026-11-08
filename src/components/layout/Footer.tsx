@@ -17,11 +17,11 @@ const { locale } = useLocale();
             <Link
   href="/"
   className="inline-flex items-center"
-  aria-label="Auctino"
+  aria-label="Vandivo"
 >
   <Image
-    src="/images/auctino-logo.png"
-    alt="Auctino"
+    src="/images/vandivo-logo.png"
+    alt="Vandivo"
     width={150}
     height={54}
     className="h-10 w-auto object-contain"
@@ -83,7 +83,7 @@ const { locale } = useLocale();
         </div>
 
         <div className="flex flex-col gap-2 border-t border-slate-100 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Auctino.</p>
+          <p>© 2026 Vandivo.</p>
           <p>{t.rights}</p>
         </div>
       </Container>

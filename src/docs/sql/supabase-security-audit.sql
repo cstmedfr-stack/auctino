@@ -1,4 +1,4 @@
--- Auctino Supabase Security Audit
+-- Vandivo Supabase Security Audit
 -- Safe read-only audit script.
 -- Run this in Supabase SQL Editor and copy the results back into the audit document.
 

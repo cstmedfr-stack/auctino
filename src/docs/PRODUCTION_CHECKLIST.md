@@ -1,8 +1,8 @@
-# Auctino Production Checklist
+# Vandivo Production Checklist
 
 ## Environment
 
-- NEXT_PUBLIC_SITE_URL is set to https://auctino.ro
+- NEXT_PUBLIC_SITE_URL is set to https://vandivo.ro
 - Supabase project URL and anon key are configured
 - Supabase Storage buckets are public where needed
 - Product image bucket works
@@ -12,10 +12,10 @@
 
 ## Domains
 
-- auctino.ro points to production
-- www.auctino.ro redirects to auctino.ro
-- auctino.com redirects to auctino.ro
-- auctino.fr is reserved for France launch
+- vandivo.ro points to production
+- www.vandivo.ro redirects to vandivo.ro
+- vandivo.com redirects to vandivo.ro
+- vandivo.fr is reserved for France launch
 
 ## SEO
 

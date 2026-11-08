@@ -35,7 +35,7 @@ export default function AuthPageShell({
 
           <p className="mt-8 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-indigo-200">
             <Sparkles size={16} />
-            Auctino
+            Vandivo
           </p>
 
           <h1 className="mt-3 max-w-xl text-4xl font-black leading-tight">

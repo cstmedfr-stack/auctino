@@ -25,7 +25,7 @@ const fallbackBadgeLabels: BadgeLabels = {
   trustedSellerElite: {
     title: "Trusted Seller Elite",
     description:
-      "Seller with an excellent reputation on Auctino.",
+      "Seller with an excellent reputation on Vandivo.",
   },
   trustedSeller: {
     title: "Trusted Seller",
@@ -50,7 +50,7 @@ const fallbackBadgeLabels: BadgeLabels = {
   newMember: {
     title: "New member",
     description:
-      "Starting their journey on Auctino.",
+      "Starting their journey on Vandivo.",
   },
 };
 

@@ -1,4 +1,4 @@
-# Auctino Design System
+# Vandivo Design System
 
 ## Philosophy
 

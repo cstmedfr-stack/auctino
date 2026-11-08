@@ -74,6 +74,6 @@ using (
 -- 6. Clean old brand name from storage policy.
 alter policy "Public can read product images"
 on storage.objects
-rename to "Public can read Auctino product images";
+rename to "Public can read Vandivo product images";
 
 commit;

@@ -1,4 +1,4 @@
-# Auctino Ideas
+# Vandivo Ideas
 
 ## Trust & reputație
 

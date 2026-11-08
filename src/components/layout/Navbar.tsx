@@ -248,11 +248,11 @@ export function Navbar() {
       : "/"
   }
   className="inline-flex items-center"
-  aria-label="Auctino"
+  aria-label="Vandivo"
 >
   <Image
-    src="/images/auctino-logo.png"
-    alt="Auctino"
+    src="/images/vandivo-logo.png"
+    alt="Vandivo"
     width={180}
     height={64}
     priority

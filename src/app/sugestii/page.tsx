@@ -31,10 +31,10 @@ const categoryIds: SuggestionCategory[] = [
 
 const translations = {
   ro: {
-    eyebrow: "Comunitatea Auctino",
-    title: "Ajută-ne să îmbunătățim Auctino",
+    eyebrow: "Comunitatea Vandivo",
+    title: "Ajută-ne să îmbunătățim Vandivo",
     subtitle:
-      "Auctino crește alături de utilizatorii săi. Propune categorii noi, funcționalități utile sau spune-ne ce putem îmbunătăți.",
+      "Vandivo crește alături de utilizatorii săi. Propune categorii noi, funcționalități utile sau spune-ne ce putem îmbunătăți.",
     sectionTitle: "Trimite-ne ideea ta",
     sectionDescription:
       "Fiecare sugestie este analizată. Nu este nevoie să ai cont pentru a ne scrie.",
@@ -46,7 +46,7 @@ const translations = {
     sending: "Se trimite...",
     successTitle: "Mulțumim pentru sugestie!",
     successText:
-      "Ideea ta a fost trimisă și va fi analizată de echipa Auctino.",
+      "Ideea ta a fost trimisă și va fi analizată de echipa Vandivo.",
     sendAnother: "Trimite încă o sugestie",
     error: "Sugestia nu a putut fi trimisă. Te rugăm să încerci din nou.",
     validation: "Mesajul trebuie să conțină între 10 și 2000 de caractere.",
@@ -65,10 +65,10 @@ const translations = {
     },
   },
   fr: {
-    eyebrow: "Communauté Auctino",
-    title: "Aidez-nous à améliorer Auctino",
+    eyebrow: "Communauté Vandivo",
+    title: "Aidez-nous à améliorer Vandivo",
     subtitle:
-      "Auctino évolue avec ses utilisateurs. Proposez de nouvelles catégories, des fonctionnalités utiles ou dites-nous ce que nous pouvons améliorer.",
+      "Vandivo évolue avec ses utilisateurs. Proposez de nouvelles catégories, des fonctionnalités utiles ou dites-nous ce que nous pouvons améliorer.",
     sectionTitle: "Partagez votre idée",
     sectionDescription:
       "Chaque suggestion sera examinée. Aucun compte n'est nécessaire pour nous écrire.",
@@ -80,7 +80,7 @@ const translations = {
     sending: "Envoi en cours...",
     successTitle: "Merci pour votre suggestion !",
     successText:
-      "Votre idée a été envoyée et sera examinée par l'équipe Auctino.",
+      "Votre idée a été envoyée et sera examinée par l'équipe Vandivo.",
     sendAnother: "Envoyer une autre suggestion",
     error: "Votre suggestion n'a pas pu être envoyée. Veuillez réessayer.",
     validation: "Le message doit contenir entre 10 et 2000 caractères.",

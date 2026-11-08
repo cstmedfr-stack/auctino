@@ -1,4 +1,4 @@
-# Auctino Architecture
+# Vandivo Architecture
 
 ## Modules
 

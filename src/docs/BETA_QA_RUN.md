@@ -1,8 +1,8 @@
-# Auctino Beta QA Run
+# Vandivo Beta QA Run
 
 ## Goal
 
-Validate Auctino with realistic user flows before beta launch.
+Validate Vandivo with realistic user flows before beta launch.
 
 A flow is not considered ready unless it works with real accounts, real Supabase data, real RLS policies and real browser navigation.
 
