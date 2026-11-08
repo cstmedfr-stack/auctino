@@ -1,8 +1,14 @@
 
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+
 import Link from "next/link";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -14,8 +20,45 @@ import AuthPageShell from "@/components/forms/AuthPageShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { supabase } from "@/lib/supabase";
+
+import {
+  supabase,
+  PASSWORD_RECOVERY_KEY,
+} from "@/lib/supabase";
+
 import { useMessages } from "@/i18n/useMessages";
+
+// Indicatorul local expiră după 10 minute.
+// Durata reală a linkului este controlată de Supabase.
+const RECOVERY_MARKER_MAX_AGE = 10 * 60 * 1000;
+
+function hasValidRecoveryMarker(
+  userId: string
+): boolean {
+  try {
+    const raw = window.sessionStorage.getItem(
+      PASSWORD_RECOVERY_KEY
+    );
+
+    if (!raw) return false;
+
+    const marker = JSON.parse(raw) as {
+      userId?: string;
+      createdAt?: number;
+    };
+
+    const age =
+      Date.now() - (marker.createdAt ?? 0);
+
+    return (
+      marker.userId === userId &&
+      age >= 0 &&
+      age < RECOVERY_MARKER_MAX_AGE
+    );
+  } catch {
+    return false;
+  }
+}
 
 export default function ResetPasswordPage() {
   const messages = useMessages();
@@ -31,17 +74,20 @@ export default function ResetPasswordPage() {
         description:
           "Choisissez un nouveau mot de passe pour votre compte Vandivo.",
         password: "Nouveau mot de passe",
-        confirm: "Confirmer le mot de passe",
+        confirm: "Confirmer le nouveau mot de passe",
         submit: "Enregistrer le mot de passe",
         loading: "Enregistrement...",
         checking: "Vérification du lien...",
         invalid:
-          "Le lien est invalide, expiré ou a déjà été utilisé. Demandez un nouveau lien.",
-        mismatch: "Les mots de passe ne correspondent pas.",
-        short: "Le mot de passe doit contenir au moins 8 caractères.",
+          "Le lien est invalide ou expiré. Veuillez demander un nouveau lien.",
+        mismatch:
+          "Les mots de passe ne correspondent pas.",
+        short:
+          "Le mot de passe doit contenir au moins 8 caractères.",
         error:
           "Impossible de modifier le mot de passe. Veuillez réessayer.",
-        success: "Votre mot de passe a été modifié avec succès.",
+        success:
+          "Votre mot de passe a été modifié avec succès.",
         login: "Retour à la connexion",
         retry: "Demander un nouveau lien",
       }
@@ -56,18 +102,22 @@ export default function ResetPasswordPage() {
         loading: "Se salvează...",
         checking: "Verificăm linkul...",
         invalid:
-          "Linkul este invalid, expirat sau a fost deja folosit. Solicită un link nou.",
+          "Linkul este invalid sau expirat. Solicită un link nou.",
         mismatch: "Parolele nu coincid.",
-        short: "Parola trebuie să conțină cel puțin 8 caractere.",
+        short:
+          "Parola trebuie să conțină cel puțin 8 caractere.",
         error:
           "Nu am putut actualiza parola. Încearcă din nou.",
-        success: "Parola a fost schimbată cu succes.",
+        success:
+          "Parola a fost schimbată cu succes.",
         login: "Înapoi la autentificare",
         retry: "Solicită un link nou",
       };
 
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+
   const [allowed, setAllowed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -77,48 +127,55 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     let active = true;
 
-    // Supabase emite PASSWORD_RECOVERY când linkul
-    // de recuperare a fost verificat cu succes.
     const { data: { subscription } } =
-      supabase.auth.onAuthStateChange((event, session) => {
+      supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (!active) return;
+
+          if (
+            event === "PASSWORD_RECOVERY" &&
+            session?.user
+          ) {
+            setAllowed(true);
+            setError("");
+            setChecking(false);
+          }
+
+          if (event === "SIGNED_OUT") {
+            setAllowed(false);
+          }
+        }
+      );
+
+    async function checkRecovery() {
+      try {
+        const { data, error: sessionError } =
+          await supabase.auth.getSession();
+
         if (!active) return;
 
-        if (event === "PASSWORD_RECOVERY" && session) {
+        if (
+          !sessionError &&
+          data.session?.user &&
+          hasValidRecoveryMarker(
+            data.session.user.id
+          )
+        ) {
           setAllowed(true);
-          setChecking(false);
           setError("");
         }
-      });
-
-    // Pentru fluxul implicit, linkul conține
-    // inițial type=recovery în fragmentul URL.
-    const hash = new URLSearchParams(
-      window.location.hash.replace(/^#/, "")
-    );
-
-    const isRecoveryLink =
-      hash.get("type") === "recovery";
-
-    // Supabase poate procesa linkul înainte ca pagina
-    // să termine inițializarea. Verificăm sesiunea
-    // numai dacă URL-ul conține un link de recovery.
-    if (isRecoveryLink) {
-      supabase.auth.getSession().then(({ data, error }) => {
-        if (!active) return;
-        if (!error && data.session) {
-          setAllowed(true);
+      } catch {
+        // Linkul va fi considerat invalid
+        // dacă nu există un eveniment sau
+        // un indicator de recuperare valid.
+      } finally {
+        if (active) {
+          setChecking(false);
         }
-        setChecking(false);
-      }).catch(() => {
-        if (active) setChecking(false);
-      });
-    } else {
-      // Permitem timp inițializării evenimentului de
-      // recuperare înainte să declarăm linkul invalid.
-      supabase.auth.getSession().finally(() => {
-        if (active) setChecking(false);
-      });
+      }
     }
+
+    void checkRecovery();
 
     return () => {
       active = false;
@@ -148,6 +205,20 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
+      const { data: sessionData } =
+        await supabase.auth.getSession();
+
+      const user = sessionData.session?.user;
+
+      if (
+        !user ||
+        !hasValidRecoveryMarker(user.id)
+      ) {
+        setAllowed(false);
+        setError(t.invalid);
+        return;
+      }
+
       const { error: updateError } =
         await supabase.auth.updateUser({
           password,
@@ -158,8 +229,18 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      setSuccess(true);
+      // Consumăm indicatorul de recuperare.
+      window.sessionStorage.removeItem(
+        PASSWORD_RECOVERY_KEY
+      );
+
       setAllowed(false);
+      setSuccess(true);
+      setPassword("");
+      setConfirmPassword("");
+
+      // După resetare, utilizatorul va
+      // trebui să se autentifice din nou.
       await supabase.auth.signOut();
     } catch {
       setError(t.error);
@@ -186,9 +267,15 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {checking && !allowed ? (
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <Loader2 size={20} className="animate-spin" />
+        {checking ? (
+          <div
+            role="status"
+            className="flex items-center gap-3 text-sm text-slate-600"
+          >
+            <Loader2
+              size={20}
+              className="animate-spin"
+            />
             {t.checking}
           </div>
         ) : success ? (
@@ -196,18 +283,25 @@ export default function ResetPasswordPage() {
             role="status"
             className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
           >
-            <CheckCircle2 size={20} className="shrink-0" />
+            <CheckCircle2
+              size={20}
+              className="shrink-0"
+            />
             {t.success}
           </div>
         ) : !allowed ? (
-          <div
-            role="alert"
-            className="space-y-4"
-          >
-            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              <AlertTriangle size={20} className="shrink-0" />
-              {t.invalid}
+          <div className="space-y-4">
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+            >
+              <AlertTriangle
+                size={20}
+                className="shrink-0"
+              />
+              {error || t.invalid}
             </div>
+
             <Link
               href="/forgot-password"
               className="text-sm font-semibold text-indigo-700 hover:underline"
@@ -237,7 +331,9 @@ export default function ResetPasswordPage() {
               label={t.confirm}
               value={confirmPassword}
               onChange={(event) =>
-                setConfirmPassword(event.target.value)
+                setConfirmPassword(
+                  event.target.value
+                )
               }
               required
             />
@@ -247,7 +343,10 @@ export default function ResetPasswordPage() {
                 role="alert"
                 className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
               >
-                <AlertTriangle size={18} className="shrink-0" />
+                <AlertTriangle
+                  size={18}
+                  className="shrink-0"
+                />
                 {error}
               </div>
             )}
