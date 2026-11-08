@@ -455,6 +455,7 @@ auth: {
     invalidCredentials: "Email sau parolă incorectă.",
     genericError:      "Autentificarea nu a reușit. Încearcă din nou.",
     noAccount: "Nu ai încă un cont?",
+    forgotPassword: "Ai uitat parola?",
     registerLink: "Creează cont",
   },
   register: {

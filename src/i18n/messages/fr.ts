@@ -464,6 +464,7 @@ auth: {
     invalidCredentials: "Email ou mot de passe incorrect.",
     genericError:      "La connexion a échoué. Veuillez réessayer.",
     noAccount: "Vous n’avez pas encore de compte ?",
+    forgotPassword: "Mot de passe oublié ?",
     registerLink: "Créer un compte",
   },
   register: {

@@ -1,10 +1,15 @@
+
 "use client";
 
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {  AlertTriangle,  Loader2,  LogIn,} from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  LogIn,
+} from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
@@ -18,10 +23,11 @@ export function LoginForm() {
   const messages = useMessages();
   const t = messages.auth.login;
   const validationMessages = messages.auth.validation;
-  const [email, setEmail] =    useState("");
-  const [password, setPassword] =    useState("");
-  const [error, setError] =    useState("");
-  const [loading, setLoading] =    useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin(
     event: FormEvent<HTMLFormElement>
@@ -29,34 +35,39 @@ export function LoginForm() {
     event.preventDefault();
 
     setError("");
-    setLoading(true);
+
     const validationError = validateLoginForm(
-  email,
-  password,
-  validationMessages
-);
+      email,
+      password,
+      validationMessages
+    );
 
     if (validationError) {
       setError(validationError);
-      setLoading(false);
-      return;
-}
-
-    const { error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-    setLoading(false);
-
-    if (loginError) {
-      setError(t.invalidCredentials);
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    setLoading(true);
+
+    try {
+      const { error: loginError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+      if (loginError) {
+        setError(t.invalidCredentials);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError(t.invalidCredentials);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -76,10 +87,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form
-        onSubmit={handleLogin}
-        className="space-y-5"
-      >
+      <form onSubmit={handleLogin} className="space-y-5">
         <Input
           id="email"
           label={t.emailLabel}
@@ -92,17 +100,28 @@ export function LoginForm() {
           required
         />
 
-        <Input
-          id="password"
-          label={t.passwordLabel}
-          type="password"
-          placeholder={t.passwordPlaceholder}
-          value={password}
-          onChange={(event) =>
-            setPassword(event.target.value)
-          }
-          required
-        />
+        <div>
+          <Input
+            id="password"
+            label={t.passwordLabel}
+            type="password"
+            placeholder={t.passwordPlaceholder}
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            required
+          />
+
+          <div className="mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 hover:underline"
+            >
+              {t.forgotPassword}
+            </Link>
+          </div>
+        </div>
 
         {error && (
           <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
