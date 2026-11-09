@@ -1344,7 +1344,7 @@ howItWorks: {
   ],
 },
 
-whyAuctino: {
+whyVandivo: {
   eyebrow: "Pourquoi Vandivo",
   title: "Un marketplace construit pour la confiance",
   description:

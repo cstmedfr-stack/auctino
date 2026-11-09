@@ -3,7 +3,7 @@ import { TrustSection } from "@/components/home/TrustSection";
 import { Categories } from "@/components/home/Categories";
 import { FeaturedAuctions } from "@/components/home/FeaturedAuctions";
 import { HowItWorks } from "@/components/home/HowItWorks";
-import { WhyAuctino } from "@/components/home/WhyAuctino";
+import { WhyVandivo } from "@/components/home/WhyVandivo";
 import { FAQ } from "@/components/home/FAQ";
 import { FinalCTA } from "@/components/home/FinalCTA";
 
@@ -15,7 +15,7 @@ export default function HomePage() {
       <Categories />
       <FeaturedAuctions />
       <HowItWorks />
-      <WhyAuctino />
+      <WhyVandivo />
       <FAQ />
       <FinalCTA />
     </main>

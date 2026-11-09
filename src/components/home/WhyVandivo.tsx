@@ -16,9 +16,9 @@ const icons = [
   Globe2,
 ];
 
-export function WhyAuctino() {
+export function WhyVandivo() {
   const messages = useMessages();
-  const t = messages.home.whyAuctino;
+  const t = messages.home.whyVandivo;
 
   return (
     <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">

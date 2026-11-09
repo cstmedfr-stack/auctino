@@ -36,7 +36,7 @@
 - Added reusable SectionHeader component.
 - Rebuilt Categories section with premium card layout.
 - Rebuilt HowItWorks section with structured step cards.
-- Rebuilt WhyAuctino section with trust-focused messaging.
+- Rebuilt WhyVandivo section with trust-focused messaging.
 - Added i18n content for homepage sections in Romanian and French.
 
 ## Batch 4 - FeaturedAuctions Premium

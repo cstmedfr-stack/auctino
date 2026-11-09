@@ -1332,7 +1332,7 @@ howItWorks: {
   ],
 },
 
-whyAuctino: {
+whyVandivo: {
   eyebrow: "De ce Vandivo",
   title: "Un marketplace construit pentru încredere",
   description:    "Nu vrem doar să listăm produse. Vrem să construim o experiență clară, sigură și modernă.",

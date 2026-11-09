@@ -1,4 +1,4 @@
-# Auctino UI Kit
+# Vandivo UI Kit
 
 ## Design Principles
 
