@@ -236,6 +236,7 @@ export async function getPublicUserProducts(
       )
     `)
     .eq("user_id", userId)
+    .eq("market_code", currentMarket.code)
     .eq("status", "active")
     .or(
       `auction_end.is.null,auction_end.gt.${now}`
