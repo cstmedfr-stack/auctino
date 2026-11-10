@@ -16,12 +16,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useMessages } from "@/i18n/useMessages";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { validateRegisterForm } from "@/utils/authValidation";
 
 export function RegisterForm() {
   const router = useRouter();
   const messages = useMessages();
   const t = messages.auth.register;
+  const { locale } = useLocale();
   const validationMessages = messages.auth.validation;
   const [fullName, setFullName] =    useState("");
   const [email, setEmail] =    useState("");
@@ -91,6 +93,32 @@ if (validationError) {
         <p className="mt-2 text-sm leading-6 text-slate-600">
           {t.description}
         </p>
+
+{/* Gratuitate cont - RO / FR */}
+<div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+  <div className="flex items-start gap-3">
+    <CheckCircle2
+      size={22}
+      className="mt-0.5 shrink-0 text-emerald-600"
+    />
+
+    <div>
+      <p className="text-sm font-bold text-emerald-900">
+        {locale === "fr"
+          ? "Votre compte Vandivo est gratuit !"
+          : "Contul Vandivo este gratuit!"}
+      </p>
+
+      <p className="mt-1 text-xs leading-5 text-emerald-800">
+        {locale === "fr"
+          ? "Inscrivez-vous gratuitement pour vendre ou participer aux enchères, sans frais de plateforme ."
+          : "Înregistrează-te gratuit și începe să vinzi sau să participi la licitații, fără taxe din partea platformei."}
+      </p>
+    </div>
+  </div>
+</div>
+{/* Sfarsit mesaj gratuitate */}
+
       </div>
 
       <form

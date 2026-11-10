@@ -615,6 +615,32 @@ export default function ProductForm({
       onSubmit={handleSubmit}
       className="space-y-5"
     >
+
+{/* Mesaj gratuitate - RO / FR */}
+<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+  <div className="flex items-center gap-3">
+    <BadgeCheck
+      size={24}
+      className="shrink-0 text-emerald-600"
+    />
+
+    <div>
+      <p className="text-base font-bold text-emerald-900">
+        {locale === "fr"
+          ? "La mise en vente est gratuite !"
+          : "Publicarea produselor este gratuită!"}
+      </p>
+
+      <p className="mt-1 text-sm leading-6 text-emerald-800">
+        {locale === "fr"
+          ? "Publiez votre article et lancez votre enchère sans frais de mise en vente."
+          : "Adaugă produsul și pornește licitația fără taxă de publicare."}
+      </p>
+    </div>
+  </div>
+</div>
+{/* Sfarsit mesaj gratuitate */}
+
       <div className="rounded-3xl border border-indigo-100 bg-indigo-50 p-5">
   <p className="inline-flex items-center gap-2 text-base font-black text-indigo-900">
     <Sparkles size={18} />
