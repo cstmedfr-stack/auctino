@@ -26,6 +26,7 @@ const LocaleContext =
 
 type LocaleProviderProps = {
   children: ReactNode;
+  initialLocale: Locale;
 };
 
 function getDomainLocale(): Locale | null {
@@ -54,9 +55,10 @@ function getDomainLocale(): Locale | null {
 
 export function LocaleProvider({
   children,
+  initialLocale,
 }: LocaleProviderProps) {
   const [locale, setLocaleState] =
-    useState<Locale>(defaultLocale);
+    useState<Locale>(initialLocale);
 
   useEffect(() => {
     const domainLocale = getDomainLocale();
