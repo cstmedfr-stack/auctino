@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -21,13 +22,35 @@ type LocaleContextValue = {
 };
 
 const LocaleContext =
-  createContext<LocaleContextValue | null>(
-    null
-  );
+  createContext<LocaleContextValue | null>(null);
 
 type LocaleProviderProps = {
   children: ReactNode;
 };
+
+function getDomainLocale(): Locale | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+
+  if (
+    hostname === "vandivo.fr" ||
+    hostname === "www.vandivo.fr"
+  ) {
+    return "fr";
+  }
+
+  if (
+    hostname === "vandivo.ro" ||
+    hostname === "www.vandivo.ro"
+  ) {
+    return "ro";
+  }
+
+  return null;
+}
 
 export function LocaleProvider({
   children,
@@ -36,24 +59,38 @@ export function LocaleProvider({
     useState<Locale>(defaultLocale);
 
   useEffect(() => {
-    const savedLocale =
-      window.localStorage.getItem(
-        "auctino-locale"
-      );
+    const domainLocale = getDomainLocale();
 
-    if (
-      savedLocale &&
-      isSupportedLocale(savedLocale)
-    ) {
-      setLocaleState(savedLocale);
-      document.documentElement.lang =
-        savedLocale;
+    if (domainLocale) {
+      setLocaleState(domainLocale);
+      document.documentElement.lang = domainLocale;
+      return;
     }
+
+    const savedLocale =
+      window.localStorage.getItem("auctino-locale");
+
+    const resolvedLocale =
+      savedLocale && isSupportedLocale(savedLocale)
+        ? savedLocale
+        : defaultLocale;
+
+    setLocaleState(resolvedLocale);
+    document.documentElement.lang = resolvedLocale;
   }, []);
 
-  function setLocale(
-    newLocale: Locale
-  ) {
+  function setLocale(newLocale: Locale) {
+    const domainLocale = getDomainLocale();
+
+    // Domeniile publice au limba fixa.
+    if (domainLocale) {
+      setLocaleState(domainLocale);
+      document.documentElement.lang = domainLocale;
+      return;
+    }
+
+    // Pe localhost si domeniile de test
+    // pastram posibilitatea schimbarii limbii.
     setLocaleState(newLocale);
 
     window.localStorage.setItem(
@@ -61,8 +98,7 @@ export function LocaleProvider({
       newLocale
     );
 
-    document.documentElement.lang =
-      newLocale;
+    document.documentElement.lang = newLocale;
   }
 
   const value = useMemo(
@@ -74,17 +110,14 @@ export function LocaleProvider({
   );
 
   return (
-    <LocaleContext.Provider
-      value={value}
-    >
+    <LocaleContext.Provider value={value}>
       {children}
     </LocaleContext.Provider>
   );
 }
 
 export function useLocale() {
-  const context =
-    useContext(LocaleContext);
+  const context = useContext(LocaleContext);
 
   if (!context) {
     throw new Error(

@@ -1,4 +1,7 @@
+
 "use client";
+
+import { useEffect, useState } from "react";
 
 import {
   localeLabels,
@@ -10,6 +13,30 @@ import { useMessages } from "@/i18n/useMessages";
 export default function LanguageSwitcher() {
   const { locale, setLocale } = useLocale();
   const messages = useMessages();
+
+  const [isPublicDomain, setIsPublicDomain] =
+    useState(true);
+
+  useEffect(() => {
+    const hostname =
+      window.location.hostname.toLowerCase();
+
+    const publicDomains = [
+      "vandivo.ro",
+      "www.vandivo.ro",
+      "vandivo.fr",
+      "www.vandivo.fr",
+    ];
+
+    setIsPublicDomain(
+      publicDomains.includes(hostname)
+    );
+  }, []);
+
+  // Nu afisam selectorul pe domeniile publice.
+  if (isPublicDomain) {
+    return null;
+  }
 
   return (
     <div
