@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -10,10 +11,12 @@ import {
 
 import { useCategoriesPage } from "@/hooks/useCategoriesPage";
 import { useMessages } from "@/i18n/useMessages";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export default function CategoriesPage() {
   const messages = useMessages();
   const t = messages.categoriesPage;
+  const { locale } = useLocale();
 
   const {
     categories,
@@ -22,6 +25,15 @@ export default function CategoriesPage() {
     error,
     loadCategories,
   } = useCategoriesPage();
+
+  function localizedName(
+    nameRo: string,
+    nameFr: string | null
+  ) {
+    return locale === "fr"
+      ? nameFr?.trim() || nameRo
+      : nameRo;
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
@@ -68,15 +80,11 @@ export default function CategoriesPage() {
               {t.errorTitle}
             </h2>
 
-            <p className="mt-2 text-sm">
-              {error}
-            </p>
+            <p className="mt-2 text-sm">{error}</p>
 
             <button
               type="button"
-              onClick={() => {
-                void loadCategories();
-              }}
+              onClick={() => void loadCategories()}
               className="mt-5 rounded-2xl bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-800"
             >
               {t.retry}
@@ -116,7 +124,10 @@ export default function CategoriesPage() {
 
                       <div>
                         <h2 className="text-xl font-black">
-                          {category.name_ro}
+                          {localizedName(
+                            category.name_ro,
+                            category.name_fr
+                          )}
                         </h2>
 
                         <p className="mt-1 text-sm text-slate-300">
@@ -127,8 +138,7 @@ export default function CategoriesPage() {
                   </Link>
 
                   <div className="p-6">
-                    {categorySubcategories.length >
-                    0 ? (
+                    {categorySubcategories.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {categorySubcategories.map(
                           (subcategory) => (
@@ -137,7 +147,10 @@ export default function CategoriesPage() {
                               href={`/dashboard?category=${category.id}&subcategory=${subcategory.id}`}
                               className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:bg-slate-950 hover:text-white"
                             >
-                              {subcategory.name_ro}
+                              {localizedName(
+                                subcategory.name_ro,
+                                subcategory.name_fr
+                              )}
                             </Link>
                           )
                         )}

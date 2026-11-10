@@ -9,6 +9,7 @@ export const PRODUCT_CATEGORIES = [
       "Gaming",
       "TV & Audio",
       "Foto & Video",
+      "Aparate medicale",
       "Accesorii",
     ],
   },
@@ -60,6 +61,7 @@ export const PRODUCT_CATEGORIES = [
     subcategories: [
       "Fitness",
       "Biciclete",
+      "Sporturi de iarnă",
       "Camping",
       "Instrumente muzicale",
       "Cărți",

@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -5,11 +6,13 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import {
   usePathname,
   useRouter,
 } from "next/navigation";
-import { Loader2 } from "lucide-react";
+
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 import { useMessages } from "@/i18n/useMessages";
@@ -19,11 +22,17 @@ type AccountStatusGuardProps = {
 };
 
 type AccountStatus =
+  | "checking"
   | "active"
-  | "suspended";
+  | "suspended"
+  | "error";
 
-const SUSPENDED_ROUTE =
-  "/account-suspended";
+type AccountState = {
+  status: AccountStatus;
+  authenticated: boolean;
+};
+
+const SUSPENDED_ROUTE = "/account-suspended";
 
 export default function AccountStatusGuard({
   children,
@@ -32,159 +41,239 @@ export default function AccountStatusGuard({
   const router = useRouter();
   const messages = useMessages();
 
-  const [checkingAccount, setCheckingAccount] =
-    useState(true);
+  const consoleError =
+    messages.guards.accountStatusConsoleError;
+
+  const [account, setAccount] =
+    useState<AccountState>({
+      status: "checking",
+      authenticated: false,
+    });
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
+    let requestId = 0;
+    let currentUserId: string | null = null;
+    let initialized = false;
 
     let profileChannel:
       | ReturnType<typeof supabase.channel>
       | null = null;
 
-    function applyAccountStatus(
-      accountStatus: AccountStatus
+    function clearProfileChannel() {
+      if (profileChannel) {
+        void supabase.removeChannel(profileChannel);
+        profileChannel = null;
+      }
+    }
+
+    async function checkUser(
+      userId: string | null
     ) {
-      if (!isMounted) return;
-
+      // Evitam verificari repetate pentru acelasi cont.
       if (
-        accountStatus === "suspended" &&
-        pathname !== SUSPENDED_ROUTE
+        initialized &&
+        currentUserId === userId
       ) {
-        router.replace(SUSPENDED_ROUTE);
         return;
       }
 
-      if (
-        accountStatus === "active" &&
-        pathname === SUSPENDED_ROUTE
-      ) {
-        router.replace("/dashboard");
-      }
-    }
+      initialized = true;
+      currentUserId = userId;
 
-    async function removeProfileChannel() {
-      if (!profileChannel) return;
+      const currentRequest = ++requestId;
 
-      await supabase.removeChannel(
-        profileChannel
-      );
+      clearProfileChannel();
 
-      profileChannel = null;
-    }
-
-    async function checkAccountStatus() {
-      if (isMounted) {
-        setCheckingAccount(true);
-      }
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (!isMounted) return;
-
-      if (userError || !user) {
-        await removeProfileChannel();
-
-        if (pathname === SUSPENDED_ROUTE) {
-          router.replace("/login");
+      if (!userId) {
+        if (mounted) {
+          setAccount({
+            status: "active",
+            authenticated: false,
+          });
         }
-
-        setCheckingAccount(false);
         return;
       }
 
-      const {
-        data: profile,
-        error: profileError,
-      } = await supabase
+      setAccount({
+        status: "checking",
+        authenticated: true,
+      });
+
+      const { data, error } = await supabase
         .from("profiles")
         .select("account_status")
-        .eq("id", user.id)
+        .eq("id", userId)
         .maybeSingle();
 
-      if (!isMounted) return;
-
-      if (profileError) {
-        console.warn(
-          messages.guards
-            .accountStatusConsoleError,
-          profileError.message
-        );
-
-        setCheckingAccount(false);
+      if (
+        !mounted ||
+        currentRequest !== requestId
+      ) {
         return;
       }
 
-      const accountStatus: AccountStatus =
-        profile?.account_status ===
-        "suspended"
+      if (error) {
+        console.warn(
+          consoleError,
+          error.message
+        );
+
+        setAccount({
+          status: "error",
+          authenticated: true,
+        });
+        return;
+      }
+
+      const status =
+        data?.account_status === "suspended"
           ? "suspended"
           : "active";
 
-      applyAccountStatus(accountStatus);
+      setAccount({
+        status,
+        authenticated: true,
+      });
 
-      await removeProfileChannel();
-
+      // Monitorizam suspendarea si reactivarea contului.
       profileChannel = supabase
-        .channel(`account-status-${user.id}`)
+        .channel(`account-status-${userId}`)
         .on(
           "postgres_changes",
           {
             event: "UPDATE",
             schema: "public",
             table: "profiles",
-            filter: `id=eq.${user.id}`,
+            filter: `id=eq.${userId}`,
           },
           (payload) => {
+            if (!mounted) return;
+
             const updatedProfile =
               payload.new as {
                 account_status?: string | null;
               };
 
-            const updatedStatus: AccountStatus =
+            const updatedStatus =
               updatedProfile.account_status ===
               "suspended"
                 ? "suspended"
                 : "active";
 
-            applyAccountStatus(
-              updatedStatus
-            );
+            setAccount({
+              status: updatedStatus,
+              authenticated: true,
+            });
           }
         )
         .subscribe();
-
-      setCheckingAccount(false);
     }
 
-    void checkAccountStatus();
+    async function initialize() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (error && user) {
+        console.warn(
+          consoleError,
+          error.message
+        );
+      }
+
+      await checkUser(user?.id ?? null);
+    }
+
+    void initialize();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      window.setTimeout(() => {
-        void checkAccountStatus();
-      }, 0);
-    });
+    } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // Ignoram evenimentele care nu schimba contul.
+        if (
+          event === "SIGNED_IN" ||
+          event === "SIGNED_OUT"
+        ) {
+          void checkUser(
+            session?.user?.id ?? null
+          );
+        }
+      }
+    );
 
     return () => {
-      isMounted = false;
+      mounted = false;
+      requestId += 1;
       subscription.unsubscribe();
-
-      if (profileChannel) {
-        void supabase.removeChannel(
-          profileChannel
-        );
-      }
+      clearProfileChannel();
     };
-  }, [pathname, router, messages.guards]);
+  }, [consoleError]);
+
+  // Redirectionarea este separata de verificarea contului.
+  useEffect(() => {
+    if (
+      account.status === "checking" ||
+      account.status === "error"
+    ) {
+      return;
+    }
+
+    if (
+      account.status === "suspended" &&
+      pathname !== SUSPENDED_ROUTE
+    ) {
+      router.replace(SUSPENDED_ROUTE);
+      return;
+    }
+
+    if (
+      account.status === "active" &&
+      pathname === SUSPENDED_ROUTE
+    ) {
+      router.replace(
+        account.authenticated
+          ? "/dashboard"
+          : "/login"
+      );
+    }
+  }, [
+    account.status,
+    account.authenticated,
+    pathname,
+    router,
+  ]);
+
+  if (account.status === "error") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
+        <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
+          <AlertTriangle
+            size={28}
+            className="mx-auto mb-4 text-red-600"
+          />
+          <p className="font-semibold text-slate-700">
+            Nu am putut verifica starea contului.
+            Reîncarcă pagina pentru a încerca din nou.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  const redirecting =
+    (account.status === "suspended" &&
+      pathname !== SUSPENDED_ROUTE) ||
+    (account.status === "active" &&
+      pathname === SUSPENDED_ROUTE);
 
   if (
-    checkingAccount &&
-    pathname !== SUSPENDED_ROUTE
+    account.status === "checking" ||
+    redirecting
   ) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">

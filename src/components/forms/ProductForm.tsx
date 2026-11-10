@@ -29,6 +29,7 @@ import {
 import { PRODUCT_CONDITIONS } from "@/constants/categories";
 import { ROMANIA_COUNTIES } from "@/constants/locations";
 import { useMessages } from "@/i18n/useMessages";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 import * as productImageService from "@/services/productImage.service";
 
@@ -40,6 +41,7 @@ type ProductFormProps = {
 type Category = {
   id: string;
   name_ro: string;
+  name_fr: string | null;
   icon: string | null;
 };
 
@@ -47,6 +49,7 @@ type Subcategory = {
   id: string;
   category_id: string;
   name_ro: string;
+  name_fr: string | null;
 };
 
 const MAX_CREATE_IMAGES = 8;
@@ -98,6 +101,11 @@ export default function ProductForm({
   const router = useRouter();
   const messages = useMessages();
   const t = messages.productForm;
+  const { locale } = useLocale();
+
+  function localizedName(nameRo: string, nameFr: string | null) {
+    return locale === "fr" ? nameFr?.trim() || nameRo : nameRo;
+  }
 
   const initialLocation = parseLocation(
     product?.location
@@ -175,7 +183,7 @@ export default function ProductForm({
 
       const { data, error } = await supabase
         .from("categories")
-        .select("id, name_ro, icon")
+        .select("id, name_ro, name_fr, icon")
         .eq("is_active", true)
         .order("display_order", {
           ascending: true,
@@ -220,7 +228,7 @@ export default function ProductForm({
 
       const { data, error } = await supabase
         .from("subcategories")
-        .select("id, category_id, name_ro")
+        .select("id, category_id, name_ro, name_fr")
         .eq(
           "category_id",
           selectedCategoryId
@@ -742,7 +750,7 @@ export default function ProductForm({
                 {category.icon
                   ? `${category.icon} `
                   : ""}
-                {category.name_ro}
+                {localizedName(category.name_ro, category.name_fr)}
               </option>
             ))}
           </select>
@@ -777,7 +785,7 @@ export default function ProductForm({
                   key={subcategory.id}
                   value={subcategory.id}
                 >
-                  {subcategory.name_ro}
+                  {localizedName(subcategory.name_ro, subcategory.name_fr)}
                 </option>
               )
             )}
