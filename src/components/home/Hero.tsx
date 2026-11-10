@@ -7,6 +7,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 
 import {
   ArrowRight,
+  BadgeCheck,
   Bell,
   Gavel,
   Heart,
@@ -81,6 +82,35 @@ export function Hero() {
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
             {t.subtitle}
           </p>
+
+{/* Gratuitate Vandivo - RO / FR */}
+<div className="mx-auto mt-7 max-w-2xl rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-5 shadow-sm sm:px-7">
+  <div className="flex items-center justify-center gap-2">
+    <BadgeCheck
+      size={25}
+      className="shrink-0 text-emerald-600"
+    />
+
+    <h2 className="text-lg font-black text-emerald-900 sm:text-xl">
+      {locale === "fr"
+        ? "100 % GRATUIT AU LANCEMENT !"
+        : "100% GRATUIT LA LANSARE!"}
+    </h2>
+  </div>
+
+  <p className="mt-2 text-center text-sm font-semibold leading-6 text-emerald-800 sm:text-base">
+    {locale === "fr"
+      ? "Inscription gratuite • Mise en vente gratuite • Enchères gratuites"
+      : "Cont gratuit • Publicare gratuită • Licitare gratuită"}
+  </p>
+
+  <p className="mt-1 text-center text-xs leading-5 text-emerald-700">
+    {locale === "fr"
+      ? "Aucun frais d'inscription ni de publication pendant cette phase."
+      : "Fără taxe de înscriere sau publicare în această etapă."}
+  </p>
+</div>
+{/* Sfarsit sectiune gratuitate */}
 
           <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500">
             {t.trustLine}
