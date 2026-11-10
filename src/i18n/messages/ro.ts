@@ -1268,7 +1268,7 @@ home: {
       },
     ],
     eyebrow: "Încredere înainte de tranzacție",
-      title: "Vandivo este construit pentru licitații clare, nu pentru haos.",
+      title: "Vandivo este construit pentru licitații clare.",
       description:        "Fiecare detaliu important este vizibil: produs, vânzător, preț, timp rămas, ofertă și conversație.",
   },
 

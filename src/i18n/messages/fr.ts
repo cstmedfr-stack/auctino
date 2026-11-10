@@ -1272,7 +1272,7 @@ chatDescription:  "Des échanges directs entre acheteur et vendeur",
       },
     ],
     eyebrow: "La confiance avant la transaction",
-title: "Vandivo est conçu pour des enchères claires, pas pour le chaos.",
+title: "Vandivo est conçu pour des enchères claires.",
 description:  "Chaque détail important est visible : produit, vendeur, prix, temps restant, offre et conversation.",
   },
 
