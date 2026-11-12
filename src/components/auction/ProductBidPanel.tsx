@@ -170,6 +170,7 @@ export default function ProductBidPanel({
             bidAmount={bidAmount}
             bidError={bidError}
             bidLoading={bidLoading}
+            bidsCount={bidsCount}
             onBidAmountChange={
               onBidAmountChange
             }

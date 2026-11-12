@@ -11,6 +11,7 @@ type BidFormProps = {
   bidAmount: string;
   bidError: string;
   bidLoading: boolean;
+  bidsCount: number;
   onBidAmountChange: (value: string) => void;
   onSubmit: (
     event: FormEvent<HTMLFormElement>
@@ -22,13 +23,16 @@ export default function BidForm({
   bidAmount,
   bidError,
   bidLoading,
+  bidsCount,
   onBidAmountChange,
   onSubmit,
 }: BidFormProps) {
   const messages = useMessages();
   const t = messages.productPage;
 
-  const minimumAmount = currentPrice + 1;
+  const minimumAmount =  bidsCount > 0
+    ? currentPrice + 1
+    : currentPrice;
 
   const minimumText = t.minimumBid.replace(
     "{amount}",

@@ -56,16 +56,23 @@ export async function placeBid({
     throw new Error("bid_foreign_market");
   }
 
-  const currentPrice =
-    product.current_price ??
-    product.starting_price;
+  
+const currentPrice =
+  product.current_price ??
+  product.starting_price;
 
-  if (
-    !Number.isFinite(amount) ||
-    amount <= currentPrice
-  ) {
-    throw new Error("bid_amount_too_low");
-  }
+const minimumAmount =
+  (product.bid_count ?? 0) > 0
+    ? currentPrice + 1
+    : product.starting_price;
+
+if (
+  !Number.isFinite(amount) ||
+  amount < minimumAmount
+) {
+  throw new Error("bid_amount_too_low");
+}
+
 
   const auctionEnded =
     product.auction_end !== null &&

@@ -840,8 +840,9 @@ function getBidServiceErrorMessage(
     const amount = Number(bidAmount);
 
     const minimumAmount =
-      (product.current_price ??
-        product.starting_price) + 1;
+  (product.bid_count ?? 0) > 0
+    ? (product.current_price ?? product.starting_price) + 1
+    : product.starting_price;
 
     if (
       !Number.isFinite(amount) ||
@@ -1220,7 +1221,7 @@ const sellerBadges = sellerProfile
               auctionClosed={
                 auctionClosed
               }
-              bidsCount={bids.length}
+              bidsCount={product.bid_count ?? 0}
               highestBidAmount={
                 highestBidAmount
               }
