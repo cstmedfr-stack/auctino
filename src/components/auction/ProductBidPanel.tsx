@@ -70,9 +70,9 @@ export default function ProductBidPanel({
   }
 
   return (
-    <section className="mt-6">
+  <section className="mt-6 w-full min-w-0">
       {isSeller && !auctionClosed && (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+       <div className="w-full min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <p className="inline-flex items-center gap-2 text-lg font-bold text-blue-700">
             <UserRound size={20} />
             {t.ownProductBidTitle}

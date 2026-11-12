@@ -479,8 +479,16 @@ auth: {
     passwordPlaceholder: "Minimum 6 caractères",
     submit: "Créer un compte",
     submitting: "Création du compte...",
-    success:      "Compte créé avec succès. Vérifiez votre email pour confirmer.",
-    genericError:      "Le compte n’a pas pu être créé. Vérifiez les informations et réessayez.",
+   
+success:
+  "Si cette adresse peut être enregistrée, vous recevrez un email de confirmation. Si vous avez déjà un compte, connectez-vous ou réinitialisez votre mot de passe.",
+alreadyExists:
+  "Cette adresse email est déjà enregistrée. Connectez-vous ou utilisez l'option « Mot de passe oublié ? ».",
+genericError:
+  "Le compte n'a pas pu être créé. Vérifiez vos informations et réessayez.",
+confirmationHint:
+  "Vous avez déjà un compte ? Vous pouvez vous connecter ou réinitialiser votre mot de passe.",
+
     alreadyHaveAccount: "Vous avez déjà un compte ?",
     loginLink: "Se connecter",
   },

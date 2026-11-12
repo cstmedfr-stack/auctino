@@ -470,9 +470,15 @@ auth: {
     passwordPlaceholder: "Minimum 6 caractere",
     submit: "Creează cont",
     submitting: "Se creează contul...",
-    success:      "Cont creat cu succes. Verifică emailul pentru confirmare.",
-    genericError:      "Contul nu a putut fi creat. Verifică datele și încearcă din nou.",
+    success:
+  "Dacă adresa poate fi înregistrată, vei primi un email de confirmare. Dacă ai deja cont, autentifică-te sau recuperează parola.",
+   genericError:
+  "Contul nu a putut fi creat. Verifică datele și încearcă din nou.",
+confirmationHint:
+  "Ai deja cont? Te poți autentifica sau îți poți recupera parola.",
     alreadyHaveAccount: "Ai deja cont?",
+    alreadyExists:
+  "Această adresă de email este deja înregistrată. Autentifică-te sau folosește opțiunea «Ai uitat parola?».",
     loginLink: "Intră în cont",
   },
   shell: {

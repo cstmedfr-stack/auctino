@@ -1082,8 +1082,8 @@ const sellerBadges = sellerProfile
     highestBid?.amount ?? currentPrice;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen w-full min-w-0 overflow-x-clip bg-slate-50 px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
         <Link
           href="/dashboard"
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-950"
@@ -1116,8 +1116,8 @@ const sellerBadges = sellerProfile
     {pageNotice.message}
   </div>
 )}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:gap-8">
-          <div className="space-y-8">
+        <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:gap-8">
+  <div className="min-w-0 space-y-8">
             <ProductGallery
               images={
                 images.length > 0
@@ -1141,7 +1141,7 @@ const sellerBadges = sellerProfile
             />
           </div>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 xl:sticky xl:top-28 xl:self-start">
+          <section className="min-w-0 w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8 xl:sticky xl:top-28 xl:self-start">
             <ProductSummaryPanel
               product={product}
               currentPrice={currentPrice}

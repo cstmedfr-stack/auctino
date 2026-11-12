@@ -106,8 +106,8 @@ export function Hero() {
 
   <p className="mt-1 text-center text-xs leading-5 text-emerald-700">
     {locale === "fr"
-      ? "Aucun frais d'inscription ni de publication pendant cette phase."
-      : "Fără taxe de înscriere sau publicare în această etapă."}
+      ? "Aucun frais d'inscription ni de publication."
+      : "Fără taxe de înscriere sau publicare."}
   </p>
 </div>
 {/* Sfarsit sectiune gratuitate */}

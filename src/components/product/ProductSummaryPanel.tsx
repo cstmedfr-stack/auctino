@@ -54,8 +54,8 @@ export default function ProductSummaryPanel({
     remainingMilliseconds !== null &&
     remainingMilliseconds <= 10 * 60 * 1000;
 
-  return (
-    <div>
+ return (
+  <div className="w-full min-w-0">
       <div className="mb-5 flex flex-wrap gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
           <Tag size={14} />
@@ -83,10 +83,10 @@ export default function ProductSummaryPanel({
         />
       </div>
 
-      <div className="mb-7 flex items-start justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-          {product.title}
-        </h1>
+     <div className="mb-7 flex min-w-0 items-start justify-between gap-3">
+  <h1 className="min-w-0 flex-1 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+    {product.title}
+  </h1>
 
         {product.status !== "removed" && (
          <button
@@ -117,13 +117,13 @@ export default function ProductSummaryPanel({
           </button>
         )}
       </div>
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/10 p-4">
-  <p className="inline-flex items-center gap-2 text-sm font-bold text-white">
-    <Info size={17} />
+          <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+  <p className="flex items-center gap-2 text-sm font-bold text-indigo-900">
+    <Info size={17} className="shrink-0" />
     {t.summaryTrustTitle}
   </p>
 
-  <p className="mt-2 text-sm leading-6 text-slate-300">
+  <p className="mt-2 text-sm leading-6 text-indigo-700">
     {t.summaryTrustDescription}
   </p>
 </div>
@@ -132,11 +132,11 @@ export default function ProductSummaryPanel({
           {t.currentOffer}
         </p>
 
-        <p className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">
-          {formatPrice(currentPrice)}
-        </p>
+       <p className="mt-2 break-words text-3xl font-extrabold tracking-tight sm:text-5xl">
+  {formatPrice(currentPrice)}
+</p>
 
-        <div className="mt-5 grid grid-cols-2 gap-4">
+       <div className="mt-5 grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-4">
           <div className="rounded-2xl bg-white/10 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {t.startingPrice}

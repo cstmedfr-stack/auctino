@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FormEvent } from "react";
@@ -37,24 +38,24 @@ export default function BidForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-3"
+      className="w-full min-w-0 space-y-3"
     >
       <input
         type="number"
+        inputMode="decimal"
         min={minimumAmount}
+        step="0.01"
         required
         value={bidAmount}
         onChange={(event) =>
-          onBidAmountChange(
-            event.target.value
-          )
+          onBidAmountChange(event.target.value)
         }
-        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+        className="block w-full min-w-0 max-w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
         placeholder={minimumText}
       />
 
       {bidError && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        <p className="break-words rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
           {bidError}
         </p>
       )}
@@ -62,12 +63,12 @@ export default function BidForm({
       <button
         type="submit"
         disabled={bidLoading}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-4 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full min-w-0 max-w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-4 text-center text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
       >
-        <Gavel size={18} />
-        {bidLoading
-          ? t.bidSubmitting
-          : t.bidSubmit}
+        <Gavel size={18} className="shrink-0" />
+        <span className="min-w-0 whitespace-normal break-words">
+          {bidLoading ? t.bidSubmitting : t.bidSubmit}
+        </span>
       </button>
     </form>
   );
