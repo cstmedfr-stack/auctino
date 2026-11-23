@@ -6,10 +6,10 @@ import {
   useState,
 } from "react";
 
-import { supabase } from "@/lib/supabase";
+import {  getMarketCode,  type MarketCode,} from "@/config/market";
 import { getMyTransactions } from "@/lib/transactions";
 import { getPublicProfiles } from "@/services/publicProfile.service";
-
+import { supabase } from "@/lib/supabase";
 import {
   Transaction,
   TransactionStatus,
@@ -23,6 +23,7 @@ type TransactionProductSummary = {
   id: string;
   title: string | null;
   image_url: string | null;
+   market_code: MarketCode;
 };
 
 type ProfileSummary = Profile & {
@@ -114,6 +115,7 @@ export function useTransactionList() {
 
     const loadedTransactions =
       (data ?? []) as Transaction[];
+      const marketCode = getMarketCode();
 
     if (loadedTransactions.length === 0) {
       setTransactions([]);
@@ -156,7 +158,8 @@ export function useTransactionList() {
       supabase
         .from("products")
         .select("id, title, image_url")
-        .in("id", productIds),
+        .in("id", productIds)
+        .eq("market_code", marketCode),
 
       getPublicProfiles(userIds),
 
@@ -246,10 +249,18 @@ export function useTransactionList() {
       {}
     );
 
-    setTransactions(completedTransactions);
-    setProductsById(productsMap);
-    setProfilesById(profilesMap);
-    setLoading(false);
+    
+const marketTransactions =
+  completedTransactions.filter(
+    (transaction) =>
+      Boolean(productsMap[transaction.product_id])
+  );
+
+setTransactions(marketTransactions);
+setProductsById(productsMap);
+setProfilesById(profilesMap);
+setLoading(false);
+
   }
 
   useEffect(() => {

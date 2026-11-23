@@ -19,12 +19,16 @@ import {
   formatLocalizedDateTime,
   formatLocalizedPrice,
 } from "@/i18n/format";
-import { currentMarket } from "@/config/market";
+import {
+  MARKET_CONFIG,
+  type MarketCode,
+} from "@/config/market";
 
 type TransactionProductSummary = {
   id: string;
   title: string | null;
   image_url: string | null;
+   market_code: MarketCode;
 };
 
 type TransactionCardData = Transaction & {
@@ -49,6 +53,9 @@ export default function TransactionCard({
   const messages = useMessages();
   const { locale } = useLocale();
   const t = messages.transaction.list;
+  const transactionCurrency = product
+  ? MARKET_CONFIG[product.market_code].currency
+  : null;
 
   const isSeller =
     currentUserId === transaction.seller_id;
@@ -199,13 +206,13 @@ export default function TransactionCard({
               </p>
 
               <p className="mt-1 text-3xl font-black text-slate-950">
-                {formatLocalizedPrice(
-                  Number(
-                    transaction.final_price ?? 0
-                  ),
-                  locale,
-                  currentMarket.currency
-                )}
+               {transactionCurrency
+  ? formatLocalizedPrice(
+      Number(transaction.final_price ?? 0),
+      locale,
+      transactionCurrency
+    )
+  : "—"}
               </p>
 
               <p className="mt-1 text-xs text-slate-400">

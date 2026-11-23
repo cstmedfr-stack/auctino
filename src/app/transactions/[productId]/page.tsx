@@ -11,6 +11,7 @@ import {
 } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
+import { getMarketCode } from "@/config/market";
 import { getPublicProfile } from "@/services/publicProfile.service";
 import {
   cancelTransaction,
@@ -50,6 +51,7 @@ type ProductDetails = {
   title: string | null;
   description: string | null;
   image_url: string | null;
+  market_code: "RO" | "FR";
 };
 
 type PublicProfileSummary = {
@@ -224,10 +226,21 @@ export default function TransactionPage() {
       return;
     }
 
-    const loadedTransaction =
-      transactionData as Transaction;
+   const loadedTransaction =
+  transactionData as Transaction;
 
-    setTransaction(loadedTransaction);
+const isAuthorizedParticipant =
+  loadedTransaction.seller_id === user.id ||
+  loadedTransaction.buyer_id === user.id;
+
+if (!isAuthorizedParticipant) {
+  setTransaction(null);
+  setError(
+    messages.transactionDetails.transactionNotFound
+  );
+  setLoading(false);
+  return;
+}
 
     const {
       data: reviewData,
@@ -253,13 +266,14 @@ export default function TransactionPage() {
       sellerResult,
       buyerResult,
     ] = await Promise.all([
-      supabase
-        .from("products")
-        .select(
-          "id, title, description, image_url"
-        )
-        .eq("id", productId)
-        .maybeSingle(),
+     supabase
+  .from("products")
+  .select(
+    "id, title, description, image_url, market_code"
+  )
+  .eq("id", productId)
+  .eq("market_code", getMarketCode())
+  .maybeSingle(),
 
       getPublicProfile(
         loadedTransaction.seller_id
@@ -277,6 +291,18 @@ export default function TransactionPage() {
         productResult.error.message
       );
     }
+
+if (productResult.error || !productResult.data) {
+  setTransaction(null);
+  setProduct(null);
+  setError(
+    messages.transactionDetails.transactionNotFound
+  );
+  setLoading(false);
+  return;
+}
+
+setTransaction(loadedTransaction);
 
     if (sellerResult.error) {
       console.error(

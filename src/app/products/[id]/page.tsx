@@ -28,7 +28,7 @@ import { Profile } from "@/types/profile";
 import { Product as MarketplaceProduct } from "@/types/product";
 import { getUserBadges } from "@/utils/badges";
 import { calculateTrustScore } from "@/utils/trustScore";
-import { currentMarket } from "@/config/market";
+import { getMarketCode } from "@/config/market";
 import { useMessages } from "@/i18n/useMessages";
 
 type Product = {
@@ -208,7 +208,7 @@ function getBidServiceErrorMessage(
           .eq("id", productId)
           .eq(
             "market_code",
-            currentMarket.code
+            getMarketCode()
           )
           .maybeSingle();
 

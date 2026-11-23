@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { currentMarket } from "@/config/market";
+import { getMarketCode } from "@/config/market";
 import {
   ArrowRight,
   Clock3,
@@ -33,7 +33,7 @@ export function FeaturedAuctions() {
   const messages = useMessages();
   const t = messages.home.featuredAuctions;
   const { locale } = useLocale();
-
+const marketCode = getMarketCode();
   const [products, setProducts] = useState<
     FeaturedProduct[]
   >([]);
@@ -54,7 +54,7 @@ export function FeaturedAuctions() {
             "id, title, category, current_price, starting_price, bid_count, auction_end, image_url"
           )
           .eq("status", "active")
-          .eq("market_code", currentMarket.code)
+          .eq("market_code", marketCode)
           .order("bid_count", {
             ascending: false,
           })
@@ -206,7 +206,7 @@ export function FeaturedAuctions() {
                             </p>
 
                             <p className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
-                              {formatPrice(price)}
+                            {formatPrice(price, marketCode)}
                             </p>
                           </div>
 
@@ -229,7 +229,7 @@ export function FeaturedAuctions() {
                       </div>
 
                       <Link
-                        href={`/products/${product.id}`}
+                      href={`/product/${product.id}`}
                         className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                       >
                         {t.viewAuction}

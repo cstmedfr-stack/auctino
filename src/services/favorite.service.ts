@@ -1,6 +1,6 @@
-import { currentMarket } from "@/config/market";
-import { supabase } from "@/lib/supabase";
 
+import { getMarketCode } from "@/config/market";
+import { supabase } from "@/lib/supabase";
 
 export async function getUserFavorites(
   userId: string
@@ -22,7 +22,7 @@ export async function getUserFavorites(
     `)
     .eq(
       "products.market_code",
-      currentMarket.code
+      getMarketCode()
     );
 }
 
@@ -36,13 +36,13 @@ export async function addFavorite(
   void userId;
 
   return await supabase.rpc(
-  "set_own_favorite",
-  {
-    p_product_id: productId,
-    p_should_be_favorite: true,
-    p_market_code: currentMarket.code,
-  }
-);
+    "set_own_favorite",
+    {
+      p_product_id: productId,
+      p_should_be_favorite: true,
+      p_market_code: getMarketCode(),
+    }
+  );
 }
 
 export async function removeFavorite(
@@ -51,14 +51,14 @@ export async function removeFavorite(
 ) {
   void userId;
 
- return await supabase.rpc(
-  "set_own_favorite",
-  {
-    p_product_id: productId,
-    p_should_be_favorite: false,
-    p_market_code: currentMarket.code,
-  }
-);
+  return await supabase.rpc(
+    "set_own_favorite",
+    {
+      p_product_id: productId,
+      p_should_be_favorite: false,
+      p_market_code: getMarketCode(),
+    }
+  );
 }
 
 export async function isFavorite(
@@ -68,12 +68,12 @@ export async function isFavorite(
   void userId;
 
   return await supabase.rpc(
-  "is_own_favorite",
-  {
-    p_product_id: productId,
-    p_market_code: currentMarket.code,
-  }
-);
+    "is_own_favorite",
+    {
+      p_product_id: productId,
+      p_market_code: getMarketCode(),
+    }
+  );
 }
 
 export async function getFavoriteProducts(
@@ -109,6 +109,6 @@ export async function getFavoriteProducts(
     `)
     .eq(
       "products.market_code",
-      currentMarket.code
+      getMarketCode()
     );
 }

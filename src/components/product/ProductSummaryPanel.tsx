@@ -10,10 +10,14 @@ import {
   Info,
 } from "lucide-react";
 import { formatPrice } from "@/utils/formatPrice";
-import { currentMarket } from "@/config/market";
+import {
+  MARKET_CONFIG,
+  type MarketCode,
+} from "@/config/market";
 import { useMessages } from "@/i18n/useMessages";
 
 type ProductSummaryPanelProduct = {
+   market_code: MarketCode;
   title: string;
   category: string | null;
   condition: string | null;
@@ -133,7 +137,7 @@ export default function ProductSummaryPanel({
         </p>
 
        <p className="mt-2 break-words text-3xl font-extrabold tracking-tight sm:text-5xl">
-  {formatPrice(currentPrice)}
+  {formatPrice(currentPrice, product.market_code)}
 </p>
 
        <div className="mt-5 grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-4">
@@ -143,9 +147,7 @@ export default function ProductSummaryPanel({
             </p>
 
             <p className="mt-1 font-bold">
-              {formatPrice(
-                product.starting_price
-              )}
+              {formatPrice(product.starting_price, product.market_code)}
             </p>
           </div>
 
@@ -204,7 +206,8 @@ export default function ProductSummaryPanel({
 
                 <p className="mt-1 text-sm font-bold text-white">
                   {formatAuctionEnd(
-                    product.auction_end
+                    product.auction_end,
+                     product.market_code
                   )}
                 </p>
               </div>
@@ -327,11 +330,17 @@ function formatRemainingTime(
   return `${minutes}${units.minute} ${seconds}${units.second}`;
 }
 
-function formatAuctionEnd(value: string) {
+
+function formatAuctionEnd(
+  value: string,
+  marketCode: MarketCode
+) {
+  const market = MARKET_CONFIG[marketCode];
+
   return new Date(value).toLocaleString(
-    currentMarket.formattingLocale,
+    market.formattingLocale,
     {
-      timeZone: currentMarket.timeZone,
+      timeZone: market.timeZone,
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

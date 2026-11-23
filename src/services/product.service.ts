@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/types/product";
-import { currentMarket } from "@/config/market";
+import { getMarketCode } from "@/config/market";
 
 export type CreateProductInput = {
   title: string;
@@ -101,7 +101,7 @@ export async function getMarketplaceProducts(
 
         p_page: safePage,
         p_page_size: safePageSize,
-        p_market_code:  currentMarket.code,
+        p_market_code:  getMarketCode(),
       }
     );
 
@@ -168,7 +168,7 @@ export async function getProducts() {
     `)
           .eq(
         "market_code",
-        currentMarket.code
+        getMarketCode()
       )
     .eq("status", "active")
     .or(
@@ -188,7 +188,7 @@ export async function getProductById(
     .eq("id", id)
     .eq(
       "market_code",
-      currentMarket.code
+      getMarketCode()
     )
     .single();
 }
@@ -210,7 +210,7 @@ export async function getUserProducts(
         name_ro
       )
     `)
-    .eq(  "market_code",  currentMarket.code)
+    .eq(  "market_code",  getMarketCode())
     .eq("user_id", userId)    .order("created_at", {      ascending: false,
     });
 }
@@ -236,7 +236,7 @@ export async function getPublicUserProducts(
       )
     `)
     .eq("user_id", userId)
-    .eq("market_code", currentMarket.code)
+    .eq("market_code", getMarketCode())
     .eq("status", "active")
     .or(
       `auction_end.is.null,auction_end.gt.${now}`
@@ -275,7 +275,7 @@ export async function createProduct(
         p_duration_days:
           values.durationDays,
           p_market_code:
-  currentMarket.code,
+  getMarketCode(),
       }
     );
 

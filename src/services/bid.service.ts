@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { currentMarket } from "@/config/market";
+import { getMarketCode } from "@/config/market";
 
 type PlaceBidProduct = {
   id: string;
@@ -50,11 +50,11 @@ export async function placeBid({
     throw new Error("bid_own_product");
   }
 
-  if (
-    product.market_code !== currentMarket.code
-  ) {
-    throw new Error("bid_foreign_market");
-  }
+ const marketCode = getMarketCode();
+
+if (product.market_code !== marketCode) {
+  throw new Error("bid_foreign_market");
+}
 
   
 const currentPrice =
@@ -102,7 +102,7 @@ if (
       {
         p_product_id: product.id,
         p_amount: amount,
-        p_market_code: currentMarket.code,
+       p_market_code: marketCode,
       }
     );
 
