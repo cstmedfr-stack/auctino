@@ -890,16 +890,27 @@ export default function ProductForm({
             {t.chooseCondition}
           </option>
 
-          {PRODUCT_CONDITIONS.map(
-            (item) => (
-              <option
-                key={item}
-                value={item}
-              >
-                {item}
-              </option>
-            )
-          )}
+         
+
+{PRODUCT_CONDITIONS.map((item) => {
+  const conditionTranslations: Record<string, string> = {
+    "Nou": "Neuf",
+    "Ca nou": "Comme neuf",
+    "Foarte bună": "Très bon état",
+    "Bună": "Bon état",
+    "Acceptabilă": "État correct",
+  };
+
+  return (
+    <option key={item} value={item}>
+      {locale === "fr"
+        ? conditionTranslations[item]
+        : item}
+    </option>
+  );
+})}
+
+
         </select>
       </FormField>
 
