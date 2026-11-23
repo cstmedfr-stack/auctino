@@ -28,6 +28,7 @@ import {
 } from "@/services/product.service";
 import { PRODUCT_CONDITIONS } from "@/constants/categories";
 import { ROMANIA_COUNTIES } from "@/constants/locations";
+import { getMarketCode, type MarketCode } from "@/config/market";
 import { useMessages } from "@/i18n/useMessages";
 import { useLocale } from "@/i18n/LocaleProvider";
 
@@ -60,6 +61,37 @@ const ALLOWED_IMAGE_TYPES = [
   "image/png",
   "image/webp",
 ];
+
+// Departamentele franceze: 96 metropolitane (inclusiv 2A/2B) si 5 DROM.
+// Codurile sunt pastrate in locatie: "34 - Hérault, Montpellier".
+const FRANCE_DEPARTMENTS = [
+  "01 - Ain", "02 - Aisne", "03 - Allier", "04 - Alpes-de-Haute-Provence",
+  "05 - Hautes-Alpes", "06 - Alpes-Maritimes", "07 - Ardèche", "08 - Ardennes",
+  "09 - Ariège", "10 - Aube", "11 - Aude", "12 - Aveyron",
+  "13 - Bouches-du-Rhône", "14 - Calvados", "15 - Cantal", "16 - Charente",
+  "17 - Charente-Maritime", "18 - Cher", "19 - Corrèze", "2A - Corse-du-Sud",
+  "2B - Haute-Corse", "21 - Côte-d'Or", "22 - Côtes-d'Armor", "23 - Creuse",
+  "24 - Dordogne", "25 - Doubs", "26 - Drôme", "27 - Eure",
+  "28 - Eure-et-Loir", "29 - Finistère", "30 - Gard", "31 - Haute-Garonne",
+  "32 - Gers", "33 - Gironde", "34 - Hérault", "35 - Ille-et-Vilaine",
+  "36 - Indre", "37 - Indre-et-Loire", "38 - Isère", "39 - Jura",
+  "40 - Landes", "41 - Loir-et-Cher", "42 - Loire", "43 - Haute-Loire",
+  "44 - Loire-Atlantique", "45 - Loiret", "46 - Lot", "47 - Lot-et-Garonne",
+  "48 - Lozère", "49 - Maine-et-Loire", "50 - Manche", "51 - Marne",
+  "52 - Haute-Marne", "53 - Mayenne", "54 - Meurthe-et-Moselle", "55 - Meuse",
+  "56 - Morbihan", "57 - Moselle", "58 - Nièvre", "59 - Nord",
+  "60 - Oise", "61 - Orne", "62 - Pas-de-Calais", "63 - Puy-de-Dôme",
+  "64 - Pyrénées-Atlantiques", "65 - Hautes-Pyrénées", "66 - Pyrénées-Orientales",
+  "67 - Bas-Rhin", "68 - Haut-Rhin", "69 - Rhône", "70 - Haute-Saône",
+  "71 - Saône-et-Loire", "72 - Sarthe", "73 - Savoie", "74 - Haute-Savoie",
+  "75 - Paris", "76 - Seine-Maritime", "77 - Seine-et-Marne", "78 - Yvelines",
+  "79 - Deux-Sèvres", "80 - Somme", "81 - Tarn", "82 - Tarn-et-Garonne",
+  "83 - Var", "84 - Vaucluse", "85 - Vendée", "86 - Vienne",
+  "87 - Haute-Vienne", "88 - Vosges", "89 - Yonne", "90 - Territoire de Belfort",
+  "91 - Essonne", "92 - Hauts-de-Seine", "93 - Seine-Saint-Denis",
+  "94 - Val-de-Marne", "95 - Val-d'Oise", "971 - Guadeloupe",
+  "972 - Martinique", "973 - Guyane", "974 - La Réunion", "976 - Mayotte",
+] as const;
 
 function parseLocation(
   location: string | null | undefined
@@ -102,6 +134,13 @@ export default function ProductForm({
   const messages = useMessages();
   const t = messages.productForm;
   const { locale } = useLocale();
+  // Initial RO on the server; detect the actual domain after hydration.
+  const [marketCode, setMarketCode] = useState<MarketCode>("RO");
+  useEffect(() => {
+    setMarketCode(getMarketCode());
+  }, []);
+  const isFrance = marketCode === "FR";
+  const locationOptions = isFrance ? FRANCE_DEPARTMENTS : ROMANIA_COUNTIES;
 
   function localizedName(nameRo: string, nameFr: string | null) {
     return locale === "fr" ? nameFr?.trim() || nameRo : nameRo;
@@ -615,6 +654,32 @@ export default function ProductForm({
       onSubmit={handleSubmit}
       className="space-y-5"
     >
+
+{/* Mesaj gratuitate - RO / FR */}
+<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+  <div className="flex items-center gap-3">
+    <BadgeCheck
+      size={24}
+      className="shrink-0 text-emerald-600"
+    />
+
+    <div>
+      <p className="text-base font-bold text-emerald-900">
+        {locale === "fr"
+          ? "La mise en vente est gratuite !"
+          : "Publicarea produselor este gratuită!"}
+      </p>
+
+      <p className="mt-1 text-sm leading-6 text-emerald-800">
+        {locale === "fr"
+          ? "Publiez votre article et lancez votre enchère sans frais de mise en vente."
+          : "Adaugă produsul și pornește licitația fără taxă de publicare."}
+      </p>
+    </div>
+  </div>
+</div>
+{/* Sfarsit mesaj gratuitate */}
+
       <div className="rounded-3xl border border-indigo-100 bg-indigo-50 p-5">
   <p className="inline-flex items-center gap-2 text-base font-black text-indigo-900">
     <Sparkles size={18} />
@@ -656,13 +721,30 @@ export default function ProductForm({
   })}
 </div>
           <input
+            id="vandivo-product-images"
             key={imageInputKey}
             type="file"
             multiple
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageSelection}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50"
+            className="peer sr-only"
           />
+          <div className="flex min-w-0 flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-100">
+            <label
+              htmlFor="vandivo-product-images"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              <UploadCloud size={17} />
+              {locale === "fr" ? "Choisir des photos" : "Alege fotografii"}
+            </label>
+            <span className="min-w-0 break-words text-sm text-slate-600" aria-live="polite">
+              {imageFiles.length === 0
+                ? locale === "fr" ? "Aucun fichier sélectionné" : "Niciun fișier selectat"
+                : locale === "fr"
+                  ? `${imageFiles.length} fichier(s) sélectionné(s)`
+                  : `${imageFiles.length} fișier(e) selectat(e)`}
+            </span>
+          </div>
 
           {imageFiles.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -822,7 +904,7 @@ export default function ProductForm({
       </FormField>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <FormField label={t.countyLabel}>
+        <FormField label={isFrance ? "Département" : t.countyLabel}>
           <select
             required
             value={county}
@@ -832,10 +914,10 @@ export default function ProductForm({
             className={inputClassName}
           >
             <option value="">
-              {t.chooseCounty}
+              {isFrance ? "Choisissez un département" : t.chooseCounty}
             </option>
 
-            {ROMANIA_COUNTIES.map(
+            {locationOptions.map(
               (item) => (
                 <option
                   key={item}
@@ -862,7 +944,7 @@ export default function ProductForm({
         </FormField>
       </div>
 
-      <FormField label={t.startingPriceLabel}>
+      <FormField label={`${t.startingPriceLabel} (${isFrance ? "€" : "RON"})`}>
         <input
           type="number"
           required
